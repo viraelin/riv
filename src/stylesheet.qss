@@ -1,0 +1,19 @@
+QScrollBar:horizontal, QScrollBar:vertical {
+    background: transparent;
+}
+
+QScrollBar::handle:horizontal, QScrollBar::handle:vertical {
+    background: transparent;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    background: transparent;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    background: transparent;
+}
+
+QAbstractScrollArea::corner {
+    background: transparent;
+}
