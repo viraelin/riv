@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 	QFileInfo info(view->current_project_path);
 	setWindowTitle(QString("%1[*]").arg(info.fileName()));
 	setAttribute(Qt::WA_TranslucentBackground, true);
-	setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+	// setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
 	setCentralWidget(view);
 
 	show();
@@ -127,10 +127,7 @@ void MainWindow::onQuitTriggered() {
 
 void MainWindow::onFlipSelection() {
 	QList<QGraphicsItem*> items = scene->selectedItems();
-	for (int i = 0; i < items.size(); ++i) {
-		GraphicsItem *item = static_cast<GraphicsItem*>(items[i]);
-		item->flip();
-	}
+	undo_stack->push(new FlipCommand(items));
 }
 
 void MainWindow::onProjectNew() {

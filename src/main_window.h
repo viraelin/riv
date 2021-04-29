@@ -94,4 +94,5 @@ class MainWindow: public QMainWindow {
 		void onBilinearFilteringToggled(const bool state);
 		void onExportSelection();
 		void onUndoStackCleanChanged(const bool is_clean);
+		void onItemFlipped(const QList<QGraphicsItem*> &items);
 };

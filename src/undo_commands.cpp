@@ -58,3 +58,22 @@ void DeleteCommand::redo() {
 		item->hide();
 	}
 }
+
+FlipCommand::FlipCommand(const QList<QGraphicsItem*> &item_list, QUndoCommand *parent): QUndoCommand(parent) {
+	items = item_list;
+}
+
+void FlipCommand::undo() {
+	flip();
+}
+
+void FlipCommand::redo() {
+	flip();
+}
+
+void FlipCommand::flip() {
+	for (int i = 0; i < items.size(); ++i) {
+		GraphicsItem *item = static_cast<GraphicsItem*>(items[i]);
+		item->flip();
+	}
+}

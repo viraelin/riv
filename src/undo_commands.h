@@ -34,3 +34,16 @@ class DeleteCommand: public QUndoCommand {
 		QGraphicsScene *scene = nullptr;
 		QList<QGraphicsItem*> items;
 };
+
+class FlipCommand: public QUndoCommand {
+	public:
+		FlipCommand(const QList<QGraphicsItem*> &item_list, QUndoCommand *parent = nullptr);
+
+		void undo() override;
+		void redo() override;
+
+	private:
+		QList<QGraphicsItem*> items;
+
+		void flip();
+};
