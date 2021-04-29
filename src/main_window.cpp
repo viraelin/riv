@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 	undo_stack = new QUndoStack(this);
 	undo_stack->setUndoLimit(50);
 
+	connect(undo_stack, &QUndoStack::cleanChanged, this, &MainWindow::onUndoStackCleanChanged);
 	connect(view, &GraphicsView::itemMoved, this, &MainWindow::onItemMoved);
 
 	// buttons
@@ -50,7 +51,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
 	connect(button_restore, &QToolButton::clicked, this, &MainWindow::onButtonRestoreClicked);
 
-	setWindowTitle("Reference Image Viewer");
+	QFileInfo info(view->current_project_path);
+	setWindowTitle(QString("%1[*]").arg(info.fileName()));
 	setAttribute(Qt::WA_TranslucentBackground, true);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
 	setCentralWidget(view);
@@ -67,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 	createMenuActions();
 	loadSettings();
 	view->projectLoad();
+	undo_stack->setClean();
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event) {
@@ -127,7 +130,6 @@ void MainWindow::onFlipSelection() {
 	for (int i = 0; i < items.size(); ++i) {
 		GraphicsItem *item = static_cast<GraphicsItem*>(items[i]);
 		item->flip();
-		view->has_scene_been_modified = true;
 	}
 }
 
@@ -135,11 +137,14 @@ void MainWindow::onProjectNew() {
 	onProjectSave();
 	view->clearCanvas();
 	view->current_project_path = "";
+	undo_stack->resetClean();
+	setWindowTitle(view->default_project_name + "[*]");
 }
 
 void MainWindow::onProjectSave() {
 	saveSettings();
 	view->projectSave();
+	undo_stack->setClean();
 }
 
 void MainWindow::onProjectOpen() {
@@ -157,6 +162,7 @@ void MainWindow::onProjectOpen() {
 
 	else {
 		view->projectLoad(file_name);
+		undo_stack->setClean();
 	}
 }
 
@@ -282,6 +288,10 @@ void MainWindow::onBilinearFilteringToggled(const bool state) {
 			item->setTransformationMode(view->transformation_mode);
 		}
 	}
+}
+
+void MainWindow::onUndoStackCleanChanged(const bool is_clean) {
+	setWindowModified(!is_clean);
 }
 
 void MainWindow::createMenuActions() {

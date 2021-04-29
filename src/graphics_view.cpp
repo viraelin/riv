@@ -37,7 +37,7 @@ GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent): QGraphicsVie
 }
 
 void GraphicsView::projectSave() {
-	if (!has_scene_been_modified) {
+	if (!parentWidget()->isWindowModified()) {
 		return;
 	}
 
@@ -108,7 +108,6 @@ void GraphicsView::projectSave() {
 		}
 
 		progress_bar->hide();
-		has_scene_been_modified = false;
 		current_project_path = project_path;
 		file.commit();
 	}
@@ -192,9 +191,11 @@ void GraphicsView::projectLoad(QString project_path) {
 		centerOn(view_position);
 
 		current_project_path = project_path;
-		has_scene_been_modified = false;
 		progress_bar->hide();
 		file.close();
+
+		QFileInfo info(project_path);
+		parentWidget()->setWindowTitle(info.fileName() + "[*]");
 	}
 
 	else {
@@ -252,7 +253,6 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 				emit itemMoved(moving_items, moving_items_old_positions);
 				moving_items.clear();
 				moving_items_old_positions.clear();
-				has_scene_been_modified = true;
 			}
 			setBoundingRect();
 		}
@@ -382,7 +382,6 @@ GraphicsItem *GraphicsView::createItem(const QString &path, const QPointF &pos, 
 	}
 
 	item->setParentItem(image_layer);
-	has_scene_been_modified = true;
 	update();
 	return item;
 }
@@ -491,7 +490,6 @@ void GraphicsView::resizeSelection(QMouseEvent *event) {
 		mouse_last_resize_position = epos;
 		scene()->destroyItemGroup(group);
 		setItemParents(items);
-		has_scene_been_modified = true;
 	}
 }
 
@@ -610,7 +608,6 @@ void GraphicsView::clearCanvas() {
 	for (int i = 0; i < current_items.size(); ++i) {
 		QGraphicsItem *item = current_items[i];
 		scene()->removeItem(item);
-		has_scene_been_modified = true;
 		delete item;
 	}
 }

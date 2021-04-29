@@ -93,4 +93,5 @@ class MainWindow: public QMainWindow {
 		void onItemDeleted();
 		void onBilinearFilteringToggled(const bool state);
 		void onExportSelection();
+		void onUndoStackCleanChanged(const bool is_clean);
 };

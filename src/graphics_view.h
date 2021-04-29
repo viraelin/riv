@@ -44,7 +44,6 @@ class GraphicsView: public QGraphicsView {
 		QString project_filter = "RIV (*.riv)";
 		const QString default_project_name = "untitled.riv";
 		QGraphicsRectItem *image_layer = nullptr;
-		bool has_scene_been_modified = false;
 		QProgressBar *progress_bar = nullptr;
 		QList<QGraphicsItem*> moving_items;
 		QList<QPointF> moving_items_old_positions;

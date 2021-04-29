@@ -7,9 +7,11 @@
 
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
-	QString name = "riv";
+	const QString name = "riv";
+	const QString display_name = "Reference Image Viewer";
 	app.setOrganizationName(name);
 	app.setApplicationName(name);
+	app.setApplicationDisplayName(display_name);
 	MainWindow window;
 	return app.exec();
 }
