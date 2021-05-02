@@ -428,11 +428,9 @@ void GraphicsView::onNetworkReplyFinished(QNetworkReply *reply) {
 	progress_bar->hide();
 	const QString temp = QDir::temp().filePath("XXXXXXXX-" + reply->url().fileName());
 	QTemporaryFile file(temp);
-	qDebug() << file.fileName();
-	const QString file_name = file.fileName();
 
 	if (file.open()) {
-		qDebug() << file.fileName();
+		const QString file_name = file.fileName();
 		file.write(reply->readAll());
 		file.close();
 
