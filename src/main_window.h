@@ -66,6 +66,7 @@ class MainWindow: public QMainWindow {
 		QWidgetAction *ignore_mouse = nullptr;
 		QWidgetAction *grayscale = nullptr;
 		QWidgetAction *bilinear_filtering = nullptr;
+		QWidgetAction *always_on_top = nullptr;
 		
 		// undo
 		QUndoStack *undo_stack = nullptr;
@@ -94,5 +95,6 @@ class MainWindow: public QMainWindow {
 		void onBilinearFilteringToggled(const bool state);
 		void onExportSelection();
 		void onUndoStackCleanChanged(const bool is_clean);
+		void onAlwaysOnTopToggled(const bool state);
 		void onItemFlipped(const QList<QGraphicsItem*> &items);
 };

@@ -237,7 +237,10 @@ void MainWindow::onIgnoreMouseToggled(const bool state) {
 	view->bounding_rect_item->setVisible(!state);
 	scene->clearSelection();
 
-	setWindowFlag(Qt::WindowStaysOnTopHint, state);
+	if (!always_on_top->isChecked()) {
+		setWindowFlag(Qt::WindowStaysOnTopHint, state);
+	}
+
 	setWindowFlag(Qt::WindowTransparentForInput, state);
 	setWindowFlag(Qt::X11BypassWindowManagerHint, state);
 	show();
@@ -287,6 +290,14 @@ void MainWindow::onBilinearFilteringToggled(const bool state) {
 	}
 }
 
+void MainWindow::onAlwaysOnTopToggled(const bool state) {
+	// required for linux
+	setWindowFlag(Qt::X11BypassWindowManagerHint, state);
+
+	setWindowFlag(Qt::WindowStaysOnTopHint, state);
+	show();
+}
+
 void MainWindow::onUndoStackCleanChanged(const bool is_clean) {
 	setWindowModified(!is_clean);
 }
@@ -307,6 +318,7 @@ void MainWindow::createMenuActions() {
 	select_all = new QAction(this);
 	bilinear_filtering = new QWidgetAction(this);
 	export_selection = new QAction(this);
+	always_on_top = new QWidgetAction(this);
 
 	undo = undo_stack->createUndoAction(this);
 	undo->setText("Undo");
@@ -332,6 +344,7 @@ void MainWindow::createMenuActions() {
 	connect(select_all, &QAction::triggered, this, &MainWindow::onSelectAll);
 	connect(bilinear_filtering, &QWidgetAction::toggled, this, &MainWindow::onBilinearFilteringToggled);
 	connect(export_selection, &QAction::triggered, this, &MainWindow::onExportSelection);
+	connect(always_on_top, &QWidgetAction::toggled, this, &MainWindow::onAlwaysOnTopToggled);
 
 	grayscale->setText("Grayscale");
 	grayscale->setCheckable(true);
@@ -396,25 +409,35 @@ void MainWindow::createMenuActions() {
 	export_selection->setText("Export Selection");
 	addAction(export_selection);
 
+	always_on_top->setText("Always on Top");
+	always_on_top->setCheckable(true);
+	addAction(always_on_top);
+
 	menu->addAction(undo);
 	menu->addAction(redo);
+
 	menu->addSeparator();
 	menu->addAction(grayscale);
 	menu->addAction(bilinear_filtering);
 	menu->addAction(ignore_mouse);
+	menu->addAction(always_on_top);
+
 	menu->addSeparator();
 	menu->addAction(select_all);
 	menu->addAction(flip_selection);
 	menu->addAction(pack_selection);
 	menu->addAction(delete_selection);
+
 	menu->addSeparator();
 	menu->addAction(project_new);
 	menu->addAction(project_save);
 	menu->addAction(project_open);
+
 	menu->addSeparator();
 	menu->addAction(import_images);
 	menu->addAction(export_selection);
 	menu->addAction(reset_view);
+
 	menu->addSeparator();
 	menu->addAction(quit);
 }

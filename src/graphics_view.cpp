@@ -84,7 +84,7 @@ void GraphicsView::projectSave() {
 			GraphicsItem *item = static_cast<GraphicsItem*>(items[i]);
 
 			const QPixmap pixmap = item->pixmap();
-			QString path = item->data(GraphicsItem::ItemPath).toString();
+			const QString path = item->data(GraphicsItem::ItemPath).toString();
 			const bool is_flipped = item->data(GraphicsItem::ItemIsFlipped).toBool();
 			// if zoomed in really far narrowing could matter
 			const QPoint position = item->pos().toPoint();
@@ -172,8 +172,8 @@ void GraphicsView::projectLoad(QString project_path) {
 			// todo: merge with createItem or args for GraphicsItem
 			GraphicsItem *item = new GraphicsItem(pixmap);
 			item->setData(GraphicsItem::ItemPath, path);
-			item->setData(GraphicsItem::ItemIsDeleted, false);
 			item->setData(GraphicsItem::ItemIsFlipped, false);
+			item->setData(GraphicsItem::ItemIsDeleted, false);
 			item->setPos(position);
 			item->setScale(scale);
 			item->setZValue(z_value);
@@ -372,6 +372,7 @@ GraphicsItem *GraphicsView::createItem(const QString &path, const QPointF &pos, 
 	GraphicsItem *item = new GraphicsItem(QPixmap(path));
 	item->setData(GraphicsItem::ItemPath, path);
 	item->setData(GraphicsItem::ItemIsFlipped, false);
+	item->setData(GraphicsItem::ItemIsDeleted, false);
 	item->setPos(pos);
 	item->setScale(scale);
 	item->setZValue(z_value);
