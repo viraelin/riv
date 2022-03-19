@@ -1,13 +1,13 @@
 # RIV
 `riv` is a Reference Image Viewer. A canvas for placing, manipulating, and viewing images.
 
-Open source, minimal, and cross-platform using C++ and Qt.
+Open source, minimal, and cross-platform using Python and Qt.
 
 
 
 
 ## Features
-- Modifications are non-destructive. RIV simply displays images.
+- Modifications are non-destructive. `riv` simply displays images.
 - Add images via drag and drop, from the web, file browser, or import manually
 - Pan/Zoom
 - Toggle color/grayscale
@@ -35,20 +35,16 @@ Data is stored in a single file with images embedded. This comes at a speed and 
 - Remaining in resize state when coming out of menu. Fix with ESC.
 
 
-## Compiling from source
-### Dependencies
-- Qt 6
-- CMake
+## Dependencies
+- Python 3.6+
+- PyQt6
 
 
-### Linux
 
 
-cd riv
-mkdir -p build-release
-cd build-release
-cmake ..
-make
+
+
+
 
 
 

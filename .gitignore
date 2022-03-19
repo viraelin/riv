@@ -1,6 +1,2 @@
-/.vscode/*
-*.o
-/build-*
-Makefile*
-moc_*.cpp
-moc_*.h
+__pycache__/
+
