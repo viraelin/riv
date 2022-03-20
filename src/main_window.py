@@ -186,15 +186,13 @@ class MainWindow(QMainWindow):
 
     def onOpenImages(self) -> None:
         _filter = "Images (*.jpg *.jpeg *.png)"
-        ok, paths = QFileDialog.getOpenFileNames(
+        paths, _selected_filter = QFileDialog.getOpenFileNames(
             self,
             "Open Images",
             QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation),
             _filter,
             _filter
         )
-        if not ok:
-            return
 
         new_paths = []
         for path in paths:

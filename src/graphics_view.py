@@ -82,14 +82,14 @@ class GraphicsView(QGraphicsView):
         project_path = self.current_project_path
         if not project_path:
             path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
-            file_name, ok = QFileDialog().getSaveFileName(
+            file_name, _selected_filter = QFileDialog().getSaveFileName(
                 self.parentWidget(),
                 "Save Project",
                 QDir(path).filePath(self.default_project_name),
                 self.project_filter
             )
 
-            if file_name and ok:
+            if file_name:
                 project_path = file_name
             else:
                 return
