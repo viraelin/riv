@@ -169,19 +169,19 @@ class MainWindow(QMainWindow):
 
 
     def onProjectOpen(self) -> None:
-        file_name = QFileDialog.getOpenFileName(
+        ok, file_name = QFileDialog.getOpenFileName(
             self,
             "Open Project",
             QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation),
             self._view.project_filter
         )
 
-        if file_name == "":
-            qDebug() << "Open project cancelled or no file name given"
-            return
-        else:
+        if ok and file_name != "":
             self._view.projectLoad(file_name)
             self._undo_stack.setClean()
+        else:
+            qDebug() << "Open project cancelled or no file name given"
+            return
 
 
     def onOpenImages(self) -> None:
