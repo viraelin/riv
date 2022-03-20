@@ -211,12 +211,13 @@ class MainWindow(QMainWindow):
             "Export Directory",
             QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
         )
+
         items = self._scene.selectedItems()
         item_count = len(items)
         self._view.showProgressBar(item_count)
         for i in range(0, item_count):
             item = items[i]
-            info = QFileInfo(item.data(GraphicsItemData.ItemPath.value).toString())
+            info = QFileInfo(item.data(GraphicsItemData.ItemPath.value))
             export_path = QDir(directory).filePath(info.fileName())
             result = item.pixmap().save(export_path)
             if not result:
