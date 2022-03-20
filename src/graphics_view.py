@@ -99,18 +99,17 @@ class GraphicsView(QGraphicsView):
             items = self.image_layer.childItems()
             view_position = self.mapToScene(self.rect().center())
             version = 100
-            item_count = len(items)
             zoom = self.transform().m11()
 
             data = {
                 "version": version,
                 "viewPosX": view_position.x(),
                 "viewPosY": view_position.y(),
-                "itemCount": item_count,
                 "zoom": zoom,
                 "items": [],
             }
 
+            item_count = len(items)
             self.showProgressBar(item_count)
 
             # save items
@@ -180,12 +179,14 @@ class GraphicsView(QGraphicsView):
 
             version = data["version"]
             view_position = QPointF(data["viewPosX"], data["viewPosY"])
-            item_count = data["itemCount"]
             zoom = data["zoom"]
 
             # todo
             if version != 100:
                 return
+
+            items = data["items"]
+            item_count = len(items)
 
             self.clearCanvas()
             self.showProgressBar(item_count)
@@ -194,7 +195,6 @@ class GraphicsView(QGraphicsView):
             self.scale(default_scale, default_scale)
             self.scale(zoom, zoom)
 
-            items = data["items"]
             for i in range(0, item_count):
                 item = items[i]
                 path = item["path"]
