@@ -169,14 +169,14 @@ class MainWindow(QMainWindow):
 
 
     def onProjectOpen(self) -> None:
-        ok, file_name = QFileDialog.getOpenFileName(
+        file_name, _selected_filter = QFileDialog.getOpenFileName(
             self,
             "Open Project",
             QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation),
             self._view.project_filter
         )
 
-        if ok and file_name != "":
+        if file_name != "":
             self._view.projectLoad(file_name)
             self._undo_stack.setClean()
         else:
