@@ -5,7 +5,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
-from graphics_item import GraphicsItem
+from graphics_item import (GraphicsItem, GraphicsItemData)
 
 
 class MoveCommand(QUndoCommand):
@@ -39,23 +39,23 @@ class DeleteCommand(QUndoCommand):
         super().__init__(parent=parent)
         self.view = view
         self.scene = view.scene()
-        self.items = scene.selectedItems()
+        self.items = self.scene.selectedItems()
         for item in self.items:
-            item.setData(GraphicsItem.ItemIsDeleted, True)
+            item.setData(GraphicsItemData.ItemIsDeleted.value, True)
             item.setSelected(True)
             item.hide()
 
 
     def undo(self) -> None:
         for item in self.items:
-            item.setData(GraphicsItem.ItemIsDeleted, False)
+            item.setData(GraphicsItemData.ItemIsDeleted.value, False)
             item.show()
             item.setParentItem(self.view.image_layer)
 
 
     def redo(self) -> None:
         for item in self.items:
-            item.setData(GraphicsItem.ItemIsDeleted, True)
+            item.setData(GraphicsItemData.ItemIsDeleted.value, True)
             item.hide()
 
 
