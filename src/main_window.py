@@ -231,7 +231,7 @@ class MainWindow(QMainWindow):
 
     def onResetView(self) -> None:
         self._view.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
-        self._view.centerOn(QPoint())
+        self._view.centerOn(QPointF())
         self._view.resetTransform()
         self._view.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
