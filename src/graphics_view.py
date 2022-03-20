@@ -36,6 +36,7 @@ class GraphicsView(QGraphicsView):
         self.current_project_path = ""
         self.project_filter = "RIV (*.riv)"
         self.default_project_name = "untitled.riv"
+        self.DATA_FILE_NAME = "data.json"
         self.moving_items = []
         self.moving_items_old_positions = []
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
@@ -149,11 +150,11 @@ class GraphicsView(QGraphicsView):
                 self.progress_bar.setValue(i * 100)
                 QApplication.processEvents()
 
-            data_file_name = "data.json"
-            with open(data_file_name, "w") as fp:
+            ok, data_file = tempfile.mkstemp()
+            with open(data_file, "w") as fp:
                 json.dump(data, fp)
 
-            zf.write(data_file_name)
+            zf.write(data_file, self.DATA_FILE_NAME)
 
             self.progress_bar.hide()
             self.current_project_path = project_path
@@ -171,9 +172,7 @@ class GraphicsView(QGraphicsView):
             return
 
         with zipfile.ZipFile(project_path, "r") as zf:
-            data_file_name = "data.json"
-
-            fp = zf.read(data_file_name)
+            fp = zf.read(self.DATA_FILE_NAME)
             data = json.loads(fp)
             assert(data)
 
