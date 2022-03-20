@@ -186,15 +186,17 @@ class MainWindow(QMainWindow):
 
     def onOpenImages(self) -> None:
         _filter = "Images (*.jpg *.jpeg *.png)"
-        paths = QFileDialog.getOpenFileNames(
+        ok, paths = QFileDialog.getOpenFileNames(
             self,
             "Open Images",
             QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation),
             _filter,
             _filter
         )
-        new_paths = []
+        if not ok:
+            return
 
+        new_paths = []
         for path in paths:
             if self._view.checkMimeData(path):
                 new_paths.append(path)
