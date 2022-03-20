@@ -1,6 +1,11 @@
 # Copyright (C) 2020 viraelin
 # License: GPLv3.0-or-later
 
+import os
+import json
+import zipfile
+import tempfile
+import shutil
 from enum import (Enum, unique)
 
 from PyQt6.QtCore import *
@@ -88,26 +93,28 @@ class GraphicsView(QGraphicsView):
             else:
                 return
 
-        file = QSaveFile(project_path)
-        if file.open(QIODevice.OpenModeFlag.WriteOnly):
-            out = QDataStream(file)
+        # todo: error handling
+        ok, save_file = tempfile.mkstemp()
+        with zipfile.ZipFile(save_file, "w", zipfile.ZIP_STORED) as zf:
             items = self.image_layer.childItems()
-
-            # project settings
-            version = 100
             view_position = self.mapToScene(self.rect().center())
-            zoom = self.transform().m11()
+            version = 100
             item_count = len(items)
+            zoom = self.transform().m11()
 
-            out.writeInt(version)
-            out.writeQVariant(view_position)
-            out.writeInt(item_count)
-            out.writeFloat(zoom)
+            data = {
+                "version": version,
+                "viewPosX": view_position.x(),
+                "viewPosY": view_position.y(),
+                "itemCount": item_count,
+                "zoom": zoom,
+                "items": [],
+            }
 
             self.showProgressBar(item_count)
 
             # save items
-            for i in range(0, len(items)):
+            for i in range(0, item_count):
                 item = items[i]
                 pixmap = item.pixmap()
                 path = item.data(GraphicsItemData.ItemPath.value)
@@ -121,34 +128,60 @@ class GraphicsView(QGraphicsView):
                     del item
                     continue
 
-                out.writeString(bytes(path, "utf-8"))
-                out.writeQVariant(pixmap)
-                out.writeBool(is_flipped)
-                out.writeQVariant(position)
-                out.writeFloat(scale)
-                out.writeFloat(z_value)
+                path_base = os.path.basename(path)
+                item_data = {
+                    "path": path_base,
+                    "flipped": is_flipped,
+                    "posX": position.x(),
+                    "posY": position.y(),
+                    "scale": scale,
+                    "zValue": z_value,
+                }
+                data["items"].append(item_data)
+
+                if path_base == path:
+                    # hack: also in loop, not ideal
+                    with zipfile.ZipFile(project_path, "r", zipfile.ZIP_STORED) as zf_old:
+                        old_path = zf_old.read(path_base)
+                        zf.writestr(path_base, old_path)
+                else:
+                    zf.write(path, path_base)
 
                 self.progress_bar.setValue(i * 100)
                 QApplication.processEvents()
 
+            data_file_name = "data.json"
+            with open(data_file_name, "w") as fp:
+                json.dump(data, fp)
+
+            zf.write(data_file_name)
+
             self.progress_bar.hide()
             self.current_project_path = project_path
-            file.commit()
+
+        # can't move file inside of with
+        if save_file and ok:
+            shutil.move(save_file, project_path)
 
 
     def projectLoad(self, project_path="") -> None:
-        # default argument workaround
         if not project_path:
             project_path = self.current_project_path
 
-        file = QFile(project_path)
-        if file.open(QIODevice.OpenModeFlag.ReadOnly):
-            in_ = QDataStream(file)
+        if not os.path.exists(project_path):
+            return
 
-            version = in_.readInt()
-            view_position = in_.readQVariant()
-            item_count = in_.readInt()
-            zoom = in_.readFloat()
+        with zipfile.ZipFile(project_path, "r") as zf:
+            data_file_name = "data.json"
+
+            fp = zf.read(data_file_name)
+            data = json.loads(fp)
+            assert(data)
+
+            version = data["version"]
+            view_position = QPointF(data["viewPosX"], data["viewPosY"])
+            item_count = data["itemCount"]
+            zoom = data["zoom"]
 
             # todo
             if version != 100:
@@ -161,20 +194,25 @@ class GraphicsView(QGraphicsView):
             self.scale(default_scale, default_scale)
             self.scale(zoom, zoom)
 
+            items = data["items"]
             for i in range(0, item_count):
-                path = in_.readString()
+                item = items[i]
+                path = item["path"]
 
                 if not path:
                     continue
 
-                # if not QFile.exists(path):
-                #     continue
+                try:
+                    pixmap_data = zf.read(path)
+                except KeyError:
+                    continue
 
-                pixmap = in_.readQVariant()
-                is_flipped = in_.readBool()
-                position = QPointF(in_.readQVariant())
-                scale = in_.readFloat()
-                z_value = in_.readFloat()
+                pixmap = QPixmap()
+                pixmap.loadFromData(pixmap_data)
+                is_flipped = item["flipped"]
+                position = QPointF(item["posX"], item["posY"])
+                scale = item["scale"]
+                z_value = item["zValue"]
 
                 # todo: merge with createItem or args for GraphicsItem
                 item = GraphicsItem(pixmap)
@@ -199,7 +237,6 @@ class GraphicsView(QGraphicsView):
 
             self.current_project_path = project_path
             self.progress_bar.hide()
-            file.close()
 
             info = QFileInfo(project_path)
             self.parentWidget().setWindowTitle(info.fileName() + "[*]")
@@ -299,6 +336,7 @@ class GraphicsView(QGraphicsView):
         urls = event.mimeData().urls()
         paths = []
 
+        # todo: drag and drop and network usage has changed
         for url in urls:
             path = url.toLocalFile()
             if self.checkMimeData(path):
@@ -350,6 +388,7 @@ class GraphicsView(QGraphicsView):
 
         self.progress_bar.hide()
         self.packSelection(origin)
+
 
     def checkMimeData(self, path: str) -> bool:
         mimetype = QMimeDatabase().mimeTypeForFile(path)
