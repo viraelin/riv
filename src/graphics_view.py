@@ -415,7 +415,7 @@ class GraphicsView(QGraphicsView):
             file.write(reply.readAll())
             file.close()
 
-            if checkMimeData(file_name):
+            if self.checkMimeData(file_name):
                 self.createItem(file_name, self._mouse_last_drop_position)
 
 
