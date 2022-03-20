@@ -180,7 +180,6 @@ class MainWindow(QMainWindow):
             self._view.projectLoad(file_name)
             self._undo_stack.setClean()
         else:
-            qDebug() << "Open project cancelled or no file name given"
             return
 
 
@@ -218,8 +217,10 @@ class MainWindow(QMainWindow):
             info = QFileInfo(item.data(GraphicsItemData.ItemPath.value))
             export_path = QDir(directory).filePath(info.fileName())
             result = item.pixmap().save(export_path)
+
             if not result:
-                qDebug() << "failed to save" << export_path
+                # todo
+                pass
 
             self._view.progress_bar.setValue(i * 100)
             QApplication.processEvents()
