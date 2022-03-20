@@ -75,9 +75,9 @@ class GraphicsView(QGraphicsView):
         scene.addItem(self.image_layer)
 
 
-    def projectSave(self) -> None:
+    def projectSave(self) -> bool:
         if not self.parentWidget().isWindowModified():
-            return
+            return False
 
         project_path = self.current_project_path
         if not project_path:
@@ -92,7 +92,7 @@ class GraphicsView(QGraphicsView):
             if file_name:
                 project_path = file_name
             else:
-                return
+                return False
 
         # todo: error handling
         ok, save_file = tempfile.mkstemp()
@@ -150,7 +150,7 @@ class GraphicsView(QGraphicsView):
                 self.progress_bar.setValue(i * 100)
                 QApplication.processEvents()
 
-            ok, data_file = tempfile.mkstemp()
+            ok2, data_file = tempfile.mkstemp()
             with open(data_file, "w") as fp:
                 json.dump(data, fp)
 
@@ -160,16 +160,18 @@ class GraphicsView(QGraphicsView):
             self.current_project_path = project_path
 
         # can't move file inside of with
-        if save_file and ok:
+        if ok and save_file:
             shutil.move(save_file, project_path)
+            return True
+        return False
 
 
-    def projectLoad(self, project_path="") -> None:
+    def projectLoad(self, project_path="") -> bool:
         if not project_path:
             project_path = self.current_project_path
 
         if not os.path.exists(project_path):
-            return
+            return False
 
         with zipfile.ZipFile(project_path, "r") as zf:
             fp = zf.read(self.DATA_FILE_NAME)
@@ -182,7 +184,7 @@ class GraphicsView(QGraphicsView):
 
             # todo
             if version != 100:
-                return
+                return False
 
             items = data["items"]
             item_count = len(items)
@@ -239,6 +241,8 @@ class GraphicsView(QGraphicsView):
 
             info = QFileInfo(project_path)
             self.parentWidget().setWindowTitle(info.fileName() + "[*]")
+            return True
+        return False
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:

@@ -96,8 +96,8 @@ class MainWindow(QMainWindow):
 
         self.createMenuActions()
         self.loadSettings()
-        self._view.projectLoad()
-        self._undo_stack.setClean()
+        if self._view.projectLoad():
+            self._undo_stack.setClean()
 
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
@@ -164,8 +164,8 @@ class MainWindow(QMainWindow):
 
     def onProjectSave(self) -> None:
         self.saveSettings()
-        self._view.projectSave()
-        self._undo_stack.setClean()
+        if self._view.projectSave():
+            self._undo_stack.setClean()
 
 
     def onProjectOpen(self) -> None:
@@ -177,8 +177,8 @@ class MainWindow(QMainWindow):
         )
 
         if file_name != "":
-            self._view.projectLoad(file_name)
-            self._undo_stack.setClean()
+            if self._view.projectLoad(file_name):
+                self._undo_stack.setClean()
         else:
             return
 
