@@ -88,11 +88,10 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        file = QFile("src/stylesheet.qss")
-        if file.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text):
-            data = file.readAll()
+        stylesheet_path = "stylesheet.qss"
+        with open(stylesheet_path, "r") as fp:
+            data = fp.read()
             self.setStyleSheet(data)
-            file.close()
 
         self.createMenuActions()
         self.loadSettings()

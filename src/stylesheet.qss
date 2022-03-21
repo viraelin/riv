@@ -1,19 +1,30 @@
-QScrollBar:horizontal, QScrollBar:vertical {
-    background: transparent;
+QProgressBar {
+    background: #111111;
+    color: #dbdbdb;
+    border: 1px solid #222222;
+    text-align: center;
 }
 
-QScrollBar::handle:horizontal, QScrollBar::handle:vertical {
-    background: transparent;
+QProgressBar::chunk {
+    background: #0bb5ff;
 }
 
-QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-    background: transparent;
+QMenu {
+    background: #111111;
+    color: #777777;
+    border: 1px solid #222222;
 }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    background: transparent;
+QMenu::separator {
+    height: 1px;
+    background: #222222;
 }
 
-QAbstractScrollArea::corner {
-    background: transparent;
+QMenu::item:selected {
+    background: #222222;
+    color: #dbdbdb;
+}
+
+QMenu::item::disabled {
+    color: #222222;
 }

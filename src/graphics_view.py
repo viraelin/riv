@@ -30,7 +30,7 @@ class GraphicsView(QGraphicsView):
 
     def __init__(self, scene: QGraphicsScene, parent=None) -> None:
         super().__init__(scene, parent=parent)
-        self.progress_bar = QProgressBar(self)
+        self.progress_bar = QProgressBar(parent)
         self.effect = QGraphicsColorizeEffect(self)
         self.image_layer = QGraphicsRectItem()
 
