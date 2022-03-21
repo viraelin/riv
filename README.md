@@ -37,7 +37,6 @@ Data is stored in a single uncompressed zip file. This has the benefit of being 
 
 ## Dependencies
 - Python 3.6+
-- PyQt6
 
 For modules, see `requirements.txt`.
 
