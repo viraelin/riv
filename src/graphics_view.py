@@ -1,5 +1,5 @@
 # Copyright (C) 2020 viraelin
-# License: GPLv3.0-or-later
+# License: GPLv3.0
 
 import os
 import json
