@@ -1,6 +1,8 @@
 # RIV
 `riv` is a Reference Image Viewer. A canvas for viewing images. Cross-platform with Python and Qt.
 
+![](../assets/riv.png?raw=true)
+
 
 ## Features
 - Modifications are non-destructive. `riv` simply displays images.
