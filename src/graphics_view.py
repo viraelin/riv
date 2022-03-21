@@ -6,6 +6,7 @@ import json
 import zipfile
 import tempfile
 import shutil
+import rpack
 from enum import (Enum, unique)
 
 from PyQt6.QtCore import *
@@ -335,7 +336,8 @@ class GraphicsView(QGraphicsView):
 
 
     def dropEvent(self, event: QDropEvent) -> None:
-        self._mouse_last_drop_position = self.mapToScene(event.position().toPoint())
+        pos = self.mapToScene(event.position().toPoint())
+        self._mouse_last_drop_position = pos
         urls = event.mimeData().urls()
         paths = []
 
@@ -350,7 +352,7 @@ class GraphicsView(QGraphicsView):
                 reply.downloadProgress.connect(self.onNetworkReplyProgress)
 
         if len(paths) > 0:
-            self.createItems(paths, self._mouse_last_drop_position)
+            self.createItems(paths, pos)
 
 
     def setBoundingRect(self) -> None:
@@ -390,7 +392,7 @@ class GraphicsView(QGraphicsView):
             QApplication.processEvents()
 
         self.progress_bar.hide()
-        self.packSelection(origin)
+        self.packSelection()
 
 
     def checkMimeData(self, path: str) -> bool:
@@ -497,56 +499,39 @@ class GraphicsView(QGraphicsView):
 
     def setItemParents(self, items: list) -> None:
         # hack to try to prevent loss when switching item group
+        # parent can be lost if only relying on destroyItemGroup to reparent
         # use plain rect item as parent because still allows canvas interaction
         for item in items:
             item.setParentItem(self.image_layer)
 
 
-    def packSelection(self, origin: QPointF) -> None:
-        # simple row packing
+    def packSelection(self) -> None:
         items = self.scene().selectedItems()
-
-        area = 0.0
-        max_width = 0.0
+        group = self.scene().createItemGroup(items)
+        rect_sizes = []
 
         for item in items:
             scale = item.sceneTransform().m11()
-            area += (item.pixmap().width() * scale) * (item.pixmap().height() * scale)
-            max_width = max(max_width, item.pixmap().width() * scale)
+            width = int(item.pixmap().width() * scale)
+            height = int(item.pixmap().height() * scale)
+            rect = (width, height)
+            rect_sizes.append(rect)
 
-        max_width *= 2.0
+        bounding_rect = group.boundingRect()
+        origin = bounding_rect.topLeft()
 
-        def sortByHeight(a: GraphicsItem, b: GraphicsItem) -> bool:
-            _as = a.sceneTransform().m11()
-            _bs = b.sceneTransform().m11()
-            return (a.pixmap().height() * _as) > (b.pixmap().height() * _bs)
+        # min width/height for pack is possible but can't be bounding rect
+        packed_positions = rpack.pack(sizes=rect_sizes)
+        assert(len(items) == len(packed_positions))
 
-        items = sorted(items, key=lambda i: i.sceneTransform().m11() * i.pixmap().height())
+        for i in range(0, len(items)):
+            item = items[i]
+            x, y = packed_positions[i]
+            pos = origin + QPointF(x, y)
+            item.setPos(pos)
 
-        x = 0
-        y = 0
-        largest_height_this_row = 0
-
-        for item in items:
-            pixmap = item.pixmap()
-            scale = item.sceneTransform().m11()
-            width = pixmap.width() * scale
-            height = pixmap.height() * scale
-
-            # if outside max width, start new row
-            if (x + height) > max_width:
-                x = 0
-                y += largest_height_this_row
-                largest_height_this_row = 0
-
-            # adjusted position
-            p = QPointF(origin.x() + (x - max_width), origin.y() + (y - max_width))
-            item.setPos(p)
-
-            x += width
-
-            if height > largest_height_this_row:
-                largest_height_this_row = height
+        self.scene().destroyItemGroup(group)
+        self.setItemParents(items)
 
 
     def showProgressBar(self, item_count: int) -> None:

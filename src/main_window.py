@@ -107,7 +107,6 @@ class MainWindow(QMainWindow):
             self._delete_selection.setEnabled(True)
 
         self._menu.popup(self._view.mapToGlobal(event.pos()))
-        self._delete_selection.setEnabled(True)
 
         # hack
         self._menu_pos = QPointF(event.pos())
@@ -262,8 +261,7 @@ class MainWindow(QMainWindow):
 
 
     def onPackSelection(self) -> None:
-        origin = self._view.mapToScene(self.mapFromGlobal(QCursor.pos()))
-        self._view.packSelection(origin)
+        self._view.packSelection()
 
 
     def onSelectAll(self) -> None:
