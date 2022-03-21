@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         self._undo_stack.setUndoLimit(50)
         self._undo_stack.cleanChanged.connect(self.onUndoStackCleanChanged)
         self._view.itemMoved.connect(self.onItemMoved)
-        self._menu_pos = QPoint()
+        self._menu_pos = QPointF()
 
         # menu
         self._delete_selection = QAction(self)
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
         self._delete_selection.setEnabled(True)
 
         # hack
-        self._menu_pos = event.pos()
+        self._menu_pos = QPointF(event.pos())
 
 
     def closeEvent(self, _event: QCloseEvent) -> None:
