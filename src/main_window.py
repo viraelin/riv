@@ -220,8 +220,7 @@ class MainWindow(QMainWindow):
                 # todo
                 pass
 
-            self._view.progress_bar.setValue(i * 100)
-            QApplication.processEvents()
+            self._view.updateProgressBar.emit(i)
 
         self._view.progress_bar.hide()
 

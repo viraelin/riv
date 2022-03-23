@@ -27,12 +27,15 @@ class GraphicsViewState(Enum):
 class GraphicsView(QGraphicsView):
 
     itemMoved = pyqtSignal(list, list)
+    updateProgressBar = pyqtSignal(int)
 
     def __init__(self, scene: QGraphicsScene, parent=None) -> None:
         super().__init__(scene, parent=parent)
         self.progress_bar = QProgressBar(parent)
         self.effect = QGraphicsColorizeEffect(self)
         self.image_layer = QGraphicsRectItem()
+
+        self.updateProgressBar.connect(self.onUpdateProgressBar)
 
         self.current_project_path = ""
         self.project_filter = "RIV (*.riv)"
@@ -148,8 +151,7 @@ class GraphicsView(QGraphicsView):
                 else:
                     zf.write(path, path_base)
 
-                self.progress_bar.setValue(i * 100)
-                QApplication.processEvents()
+                self.updateProgressBar.emit(i)
 
             ok2, data_file = tempfile.mkstemp()
             with open(data_file, "w") as fp:
@@ -230,9 +232,7 @@ class GraphicsView(QGraphicsView):
                     item.flip()
 
                 item.setParentItem(self.image_layer)
-
-                self.progress_bar.setValue(i * 100)
-                QApplication.processEvents()
+                self.updateProgressBar.emit(i)
 
             self.setBoundingRect()
             self.centerOn(view_position)
@@ -388,8 +388,7 @@ class GraphicsView(QGraphicsView):
             path = paths[i]
             item = self.createItem(path, origin)
             item.setSelected(True)
-            self.progress_bar.setValue(i * 100)
-            QApplication.processEvents()
+            self.updateProgressBar.emit(i)
 
         self.progress_bar.hide()
         self.packSelection()
@@ -590,3 +589,8 @@ class GraphicsView(QGraphicsView):
                 continue
             max_z = max(max_z, colliding_item.zValue())
         item.setZValue(max_z + 1)
+
+
+    def onUpdateProgressBar(self, value: int) -> None:
+        step = value * 100
+        self.progress_bar.setValue(step)
