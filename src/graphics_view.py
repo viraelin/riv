@@ -28,6 +28,10 @@ class GraphicsView(QGraphicsView):
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
+        self.grayscale_effect = QGraphicsColorizeEffect()
+        self.grayscale_effect.setColor(0)
+        self.grayscale_effect.setEnabled(False)
+        self.setGraphicsEffect(self.grayscale_effect)
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

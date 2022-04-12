@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMenu
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtWidgets import (QMenu, QWidgetAction)
+from PyQt6.QtGui import (QAction, QKeySequence)
 
 
 class Actions:
@@ -38,7 +38,16 @@ class Actions:
         self.flip.setEnabled(False)
         self.parent.addAction(self.flip)
 
+        self.grayscale = QWidgetAction(parent)
+        self.grayscale.setCheckable(True)
+        self.grayscale.toggled.connect(self.onGrayscale)
+        self.grayscale.setText("Grayscale")
+        self.grayscale.setShortcut(QKeySequence(Qt.Key.Key_G))
+        self.grayscale.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.grayscale)
+
         self.menu.addAction(self.flip)
+        self.menu.addAction(self.grayscale)
         self.menu.addSeparator()
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
@@ -60,3 +69,7 @@ class Actions:
 
     def onFlip(self) -> None:
         self.parent.flipSelection()
+
+
+    def onGrayscale(self, state: bool) -> None:
+        self.parent.grayscale(state)

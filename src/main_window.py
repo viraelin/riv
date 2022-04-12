@@ -45,6 +45,8 @@ class MainWindow(QMainWindow):
         default_file_path = os.path.join(system.DEFAULT_FILE_DIR, system.DEFAULT_FILE_NAME)
         file_path = system.settings.value("file_path", default_file_path, type=str)
         system.last_dialog_dir = system.settings.value("last_dir", system.DEFAULT_FILE_DIR, type=str)
+        is_grayscale = system.settings.value("grayscale", False, type=bool)
+        system.actions.grayscale.setChecked(is_grayscale)
 
         # project
         if file_path != default_file_path:
@@ -93,6 +95,7 @@ class MainWindow(QMainWindow):
 
         system.settings.setValue("file_path", file_path)
         system.settings.setValue("last_dir", system.last_dialog_dir)
+        system.settings.setValue("grayscale", system.actions.grayscale.isChecked())
 
 
     def open(self):
@@ -123,3 +126,7 @@ class MainWindow(QMainWindow):
         items = self.scene.selectedItems()
         for item in items:
             item.flip()
+
+
+    def grayscale(self, state: bool) -> None:
+        self.view.grayscale_effect.setEnabled(state)
