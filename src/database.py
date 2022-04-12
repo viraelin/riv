@@ -1,4 +1,5 @@
 import os
+import tempfile
 import sqlite3
 
 from PyQt6.QtCore import *
@@ -11,36 +12,36 @@ from graphics_item import GraphicsItem
 class Database:
 
     def __init__(self) -> None:
-        self.file_name = "data.riv"
+        self.file_path = ""
 
 
     def createDatabase(self) -> None:
-        connection = sqlite3.connect(self.file_name)
+        connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         view(
             id INTEGER PRIMARY KEY,
             x INTEGER,
             y INTEGER,
-            zoom FLOAT
+            scale FLOAT
             )""")
         cursor.execute("INSERT OR IGNORE INTO view VALUES (?, ?, ?, ?)",
             [0, 0, 0, 1.0])
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         images(
             id INTEGER PRIMARY KEY,
-            image BLOB,
             x INTEGER,
             y INTEGER,
             z INTEGER,
             scale FLOAT,
-            flip BOOL
+            flip BOOL,
+            image BLOB
             )""")
         connection.commit()
 
 
     def loadView(self) -> list:
-        connection = sqlite3.connect(self.file_name)
+        connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM view WHERE id == 0")
         data = cursor.fetchall()[0]
@@ -48,24 +49,31 @@ class Database:
 
 
     def loadImages(self) -> list:
-        connection = sqlite3.connect(self.file_name)
+        connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM images")
         data = cursor.fetchall()
         return data
 
 
-    def saveDatabase(self, view: QGraphicsView, items: list) -> None:
-        connection = sqlite3.connect(self.file_name)
+    def updateView(self, view: QGraphicsView) -> None:
+        connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
 
-        view_zoom = view.transform().m11()
+        view_scale = view.transform().m11()
         view_pos = view.mapToScene(view.rect().center())
         view_x = int(view_pos.x())
         view_y = int(view_pos.y())
         cursor.execute("UPDATE view SET x = ? WHERE id == 0", [view_x])
         cursor.execute("UPDATE view SET y = ? WHERE id == 0", [view_y])
-        cursor.execute("UPDATE view SET zoom = ? WHERE id == 0", [view_zoom])
+        cursor.execute("UPDATE view SET scale = ? WHERE id == 0", [view_scale])
+
+        connection.commit()
+
+
+    def updateItems(self, items: list) -> None:
+        connection = sqlite3.connect(self.file_path)
+        cursor = connection.cursor()
 
         for item in items:
             x = int(item.pos().x())
@@ -95,7 +103,7 @@ class Database:
         scale = item.sceneTransform().m11()
         flip = item.is_flipped
 
-        connection = sqlite3.connect(self.file_name)
+        connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
         cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?)",
             [item.id, x, y, z, scale, flip, image])

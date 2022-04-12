@@ -16,8 +16,20 @@ class Actions:
         self.save.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.save)
 
+        self.open = QAction(parent)
+        self.open.triggered.connect(self.onOpen)
+        self.open.setText("Open")
+        self.open.setShortcut(QKeySequence.StandardKey.Open)
+        self.open.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.open)
+
         self.menu.addAction(self.save)
+        self.menu.addAction(self.open)
 
 
     def onSave(self) -> None:
         self.parent.save()
+
+
+    def onOpen(self) -> None:
+        self.parent.open()

@@ -5,7 +5,6 @@ import os
 import json
 import zipfile
 import tempfile
-import shutil
 import rpack
 import imghdr
 
@@ -64,12 +63,14 @@ class GraphicsView(QGraphicsView):
         view_data = system.sql.loadView()
         view_x = view_data[1]
         view_y = view_data[2]
-        view_zoom = view_data[3]
+        view_scale = view_data[3]
         view_pos = QPointF(view_x, view_y)
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
         self.updateSceneSize()
-        self.scale(view_zoom, view_zoom)
+        default_scale = 1.0/self.transform().m11()
+        self.scale(default_scale, default_scale)
+        self.scale(view_scale, view_scale)
         self.centerOn(view_pos)
 
 
@@ -114,6 +115,10 @@ class GraphicsView(QGraphicsView):
         pos = self.mapToScene(event.position().toPoint())
         self._mouse_last_drop_position = pos
 
+        can_store = False
+        if system.sql.file_path != "":
+            can_store = True
+
         if mimedata.hasUrls():
             urls = mimedata.urls()
             print("urls: ", urls)
@@ -122,7 +127,8 @@ class GraphicsView(QGraphicsView):
                     path = url.path()
                     item = self.createItem(path, pos)
                     self.scene().addItem(item)
-                    system.sql.storeItem(item)
+                    if can_store:
+                        system.sql.storeItem(item)
                 else:
                     pass
         elif mimedata.hasImage():

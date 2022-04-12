@@ -1,6 +1,8 @@
 # Copyright (C) 2020-2022 viraelin
 # License: GPLv3.0
 
+import os
+
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
@@ -40,7 +42,20 @@ class MainWindow(QMainWindow):
         geometry = system.settings.value("geometry", default_geometry, type=QRect)
         self.setGeometry(geometry)
 
+        default_file_path = os.path.join(system.DEFAULT_FILE_DIR, system.DEFAULT_FILE_NAME)
+        file_path = system.settings.value("file_path", default_file_path, type=str)
+        system.last_dialog_dir = system.settings.value("last_dir", system.DEFAULT_FILE_DIR, type=str)
+
         # project
+        if file_path != default_file_path:
+            system.sql.file_path = file_path
+            system.sql.createDatabase()
+            self.view.load()
+
+
+    def loadFile(self, file_path: str):
+        self.scene.clear()
+        system.sql.file_path = file_path
         system.sql.createDatabase()
         self.view.load()
 
@@ -48,10 +63,52 @@ class MainWindow(QMainWindow):
     def save(self):
         # settings
         system.settings.setValue("geometry", self.geometry())
+        default_file_path = os.path.join(system.DEFAULT_FILE_DIR, system.DEFAULT_FILE_NAME)
+        file_path = default_file_path
 
         # project
-        items = self.scene.items()
-        system.sql.saveDatabase(self.view, items)
+        if system.sql.file_path == "":
+            file_path, _selected_filter = QFileDialog().getSaveFileName(
+                self,
+                "Save Project",
+                default_file_path,
+                system.PROJECT_FILTER
+            )
+
+            if file_path:
+                system.last_dialog_dir, _ = os.path.split(file_path)
+                system.sql.file_path = file_path
+                system.sql.createDatabase()
+                system.sql.updateView(self.view)
+                items = self.scene.items()
+                for item in items:
+                    system.sql.storeItem(item)
+            else:
+                return
+        else:
+            file_path = system.sql.file_path
+            items = self.scene.items()
+            system.sql.updateView(self.view)
+            system.sql.updateItems(items)
+
+        system.settings.setValue("file_path", file_path)
+        system.settings.setValue("last_dir", system.last_dialog_dir)
+
+
+    def open(self):
+        start_dir = system.last_dialog_dir
+        file_path, _selected_filter = QFileDialog().getOpenFileName(
+            self,
+            "Open Project",
+            start_dir,
+            system.PROJECT_FILTER
+        )
+
+        if file_path:
+            system.last_dialog_dir, _ = os.path.split(file_path)
+            self.loadFile(file_path)
+        else:
+            return
 
 
     def closeEvent(self, _event: QCloseEvent) -> None:
