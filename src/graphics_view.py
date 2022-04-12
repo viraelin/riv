@@ -37,20 +37,18 @@ class GraphicsView(QGraphicsView):
         self.setAcceptDrops(True)
         self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
         self.setStyleSheet("background-color: #100111111;")
-        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
-        self.updateSceneSize()
         self.projectLoad()
 
 
     def projectSave(self):
         items = self.scene().items()
-        self.db.saveDatabase(items)
+        self.db.saveDatabase(self, items)
 
 
     def projectLoad(self):
-        data = self.db.loadDatabase()
-        for entry in data:
+        image_data = self.db.loadImages()
+        for entry in image_data:
             item_id = entry[0]
             item_image = entry[1]
             item_x = entry[2]
@@ -71,6 +69,18 @@ class GraphicsView(QGraphicsView):
             if item.is_flipped:
                 item.flip()
             self.scene().addItem(item)
+
+        view_data = self.db.loadView()
+        version = view_data[1]
+        view_x = view_data[2]
+        view_y = view_data[3]
+        view_zoom = view_data[4]
+        view_pos = QPointF(view_x, view_y)
+
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        self.updateSceneSize()
+        self.scale(view_zoom, view_zoom)
+        self.centerOn(view_pos)
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
@@ -162,6 +172,7 @@ class GraphicsView(QGraphicsView):
         if not len(self.scene().items()) > 0:
             return
 
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
         self.updateSceneSize()
         old_pos = self.mapToScene(self._mouse_last_pan_position.toPoint())
         new_pos = self.mapToScene(event.position().toPoint())
@@ -194,6 +205,7 @@ class GraphicsView(QGraphicsView):
             if scale * factor < scale_min:
                 return
 
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
         self.scale(factor, factor)
         new_pos = self.mapToScene(pos)
         delta = new_pos - old_pos
