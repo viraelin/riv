@@ -1,3 +1,6 @@
+# Copyright (C) 2020-2022 viraelin
+# License: GPLv3.0
+
 import os
 import tempfile
 import sqlite3

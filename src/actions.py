@@ -1,3 +1,6 @@
+# Copyright (C) 2020-2022 viraelin
+# License: GPLv3.0
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMenu, QWidgetAction)
 from PyQt6.QtGui import (QAction, QKeySequence)
