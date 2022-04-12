@@ -46,8 +46,17 @@ class Actions:
         self.grayscale.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.grayscale)
 
+        self.select_all = QWidgetAction(parent)
+        self.select_all.setCheckable(True)
+        self.select_all.toggled.connect(self.onSelectAll)
+        self.select_all.setText("Select All")
+        self.select_all.setShortcut(QKeySequence.StandardKey.SelectAll)
+        self.select_all.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.select_all)
+
         self.menu.addAction(self.flip)
         self.menu.addAction(self.grayscale)
+        self.menu.addAction(self.select_all)
         self.menu.addSeparator()
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
@@ -73,3 +82,7 @@ class Actions:
 
     def onGrayscale(self, state: bool) -> None:
         self.parent.grayscale(state)
+
+
+    def onSelectAll(self) -> None:
+        self.parent.selectAll()

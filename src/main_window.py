@@ -130,3 +130,10 @@ class MainWindow(QMainWindow):
 
     def grayscale(self, state: bool) -> None:
         self.view.grayscale_effect.setEnabled(state)
+
+
+    def selectAll(self) -> None:
+        self.scene.clearSelection()
+        items = self.scene.items()
+        for item in items:
+            item.setSelected(True)
