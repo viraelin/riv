@@ -1,21 +1,16 @@
 # Copyright (C) 2020-2022 viraelin
 # License: GPLv3.0
 
-from enum import (Enum, unique)
-
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
 
-@unique
-class GraphicsItemData(Enum):
+class GraphicsItem(QGraphicsPixmapItem):
+
     ItemPath = Qt.ItemDataRole.UserRole+1
     ItemIsFlipped = Qt.ItemDataRole.UserRole+2
     ItemIsDeleted = Qt.ItemDataRole.UserRole+3
-
-
-class GraphicsItem(QGraphicsPixmapItem):
 
     def __init__(self, pixmap: QPixmap, parent=None) -> None:
         super().__init__(pixmap, parent=parent)
@@ -27,8 +22,8 @@ class GraphicsItem(QGraphicsPixmapItem):
     def flip(self) -> None:
         mirror = self.pixmap().transformed(QTransform().scale(-1, 1))
         self.setPixmap(mirror)
-        state = not self.data(GraphicsItemData.ItemIsFlipped.value)
-        self.setData(GraphicsItemData.ItemIsFlipped.value, state)
+        state = not self.data(ItemIsFlipped)
+        self.setData(ItemIsFlipped, state)
 
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem, widget: QWidget) -> None:
