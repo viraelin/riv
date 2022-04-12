@@ -69,6 +69,7 @@ class GraphicsView(QGraphicsView):
             if item.is_flipped:
                 item.flip()
             self.scene().addItem(item)
+            self.id += 1
 
         view_data = self.db.loadView()
         version = view_data[1]

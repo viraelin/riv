@@ -83,7 +83,9 @@ class Database:
             cursor.execute("UPDATE images SET scale = ? WHERE id == ?", [scale, item.id])
             cursor.execute("UPDATE images SET z_value = ? WHERE id == ?", [z_value, item.id])
             cursor.execute("UPDATE images SET flipped = ? WHERE id == ?", [flipped, item.id])
+
         connection.commit()
+        cursor.execute("VACUUM")
 
 
     def storeItem(self, item: GraphicsItem) -> None:
