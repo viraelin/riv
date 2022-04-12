@@ -50,12 +50,12 @@ class GraphicsView(QGraphicsView):
         image_data = self.db.loadImages()
         for entry in image_data:
             item_id = entry[0]
-            item_image = entry[1]
-            item_x = entry[2]
-            item_y = entry[3]
+            item_x = entry[1]
+            item_y = entry[2]
+            item_z_value = entry[3]
             item_scale = entry[4]
-            item_z_value = entry[5]
-            item_is_flipped = entry[6]
+            item_is_flipped = entry[5]
+            item_image = entry[6]
 
             pixmap = QPixmap()
             pixmap.loadFromData(item_image)
@@ -72,10 +72,9 @@ class GraphicsView(QGraphicsView):
             self.id += 1
 
         view_data = self.db.loadView()
-        version = view_data[1]
-        view_x = view_data[2]
-        view_y = view_data[3]
-        view_zoom = view_data[4]
+        view_x = view_data[1]
+        view_y = view_data[2]
+        view_zoom = view_data[3]
         view_pos = QPointF(view_x, view_y)
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
