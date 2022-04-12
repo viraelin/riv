@@ -47,6 +47,10 @@ class MainWindow(QMainWindow):
         system.last_dialog_dir = system.settings.value("last_dir", system.DEFAULT_FILE_DIR, type=str)
         is_grayscale = system.settings.value("grayscale", False, type=bool)
         system.actions.grayscale.setChecked(is_grayscale)
+        self.setGrayscale(is_grayscale)
+        is_filtering = system.settings.value("filtering", True, type=bool)
+        system.actions.filtering.setChecked(is_filtering)
+        self.setFiltering(is_filtering)
 
         # project
         if file_path != default_file_path:
@@ -96,6 +100,7 @@ class MainWindow(QMainWindow):
         system.settings.setValue("file_path", file_path)
         system.settings.setValue("last_dir", system.last_dialog_dir)
         system.settings.setValue("grayscale", system.actions.grayscale.isChecked())
+        system.settings.setValue("filtering", system.actions.filtering.isChecked())
 
 
     def open(self):
@@ -128,7 +133,7 @@ class MainWindow(QMainWindow):
             item.flip()
 
 
-    def grayscale(self, state: bool) -> None:
+    def setGrayscale(self, state: bool) -> None:
         self.view.grayscale_effect.setEnabled(state)
 
 
@@ -137,3 +142,15 @@ class MainWindow(QMainWindow):
         items = self.scene.items()
         for item in items:
             item.setSelected(True)
+
+
+    def setFiltering(self, state: bool) -> None:
+        items = self.scene.items()
+        mode = None
+        if state:
+            mode = Qt.TransformationMode.SmoothTransformation
+        else:
+            mode = Qt.TransformationMode.FastTransformation
+        self.view.transformation_mode = mode
+        for item in items:
+            item.setTransformationMode(mode)
