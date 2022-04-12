@@ -7,11 +7,13 @@ import zipfile
 import tempfile
 import shutil
 import rpack
+import imghdr
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
+from database import Database
 from graphics_item import GraphicsItem
 
 
@@ -22,6 +24,8 @@ class GraphicsView(QGraphicsView):
     def __init__(self, scene: QGraphicsScene, parent=None) -> None:
         super().__init__(scene, parent=parent)
 
+        self.db = Database()
+        self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
@@ -34,6 +38,29 @@ class GraphicsView(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
         self.updateSceneSize()
+
+        data = self.db.loadDatabase()
+        for entry in data:
+            item_id = entry[0]
+            item_image = entry[1]
+            item_x = entry[2]
+            item_y = entry[3]
+            item_scale = entry[4]
+            item_z_value = entry[5]
+            item_is_flipped = entry[6]
+
+            pixmap = QPixmap()
+            pixmap.loadFromData(item_image)
+
+            item = GraphicsItem(item_id, pixmap)
+            item.setScale(item_scale)
+            item.setPos(item_x, item_y)
+            item.setZValue(item_z_value)
+            item.is_flipped = item_is_flipped
+            item.setTransformationMode(self.transformation_mode)
+            if item.is_flipped:
+                item.flip()
+            self.scene().addItem(item)
 
 
     def projectSave(self) -> bool:
@@ -93,6 +120,7 @@ class GraphicsView(QGraphicsView):
                     path = url.path()
                     item = self.createItem(path, pos)
                     self.scene().addItem(item)
+                    self.db.storeItem(item)
                 else:
                     pass
         elif mimedata.hasImage():
@@ -100,10 +128,9 @@ class GraphicsView(QGraphicsView):
 
 
     def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0) -> GraphicsItem:
-        item = GraphicsItem(QPixmap(path))
-        item.setData(GraphicsItem.ItemPath, path)
-        item.setData(GraphicsItem.ItemIsFlipped, False)
-        item.setData(GraphicsItem.ItemIsDeleted, False)
+        item = GraphicsItem(self.id, QPixmap(path))
+        item.path = path
+        item.type = imghdr.what(path)
         item.setPos(pos)
         item.setScale(scale)
         item.setZValue(z_value)
@@ -113,6 +140,7 @@ class GraphicsView(QGraphicsView):
             item.flip()
 
         self.update()
+        self.id += 1
         return item
 
 

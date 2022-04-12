@@ -8,12 +8,13 @@ from PyQt6.QtGui import *
 
 class GraphicsItem(QGraphicsPixmapItem):
 
-    ItemPath = Qt.ItemDataRole.UserRole+1
-    ItemIsFlipped = Qt.ItemDataRole.UserRole+2
-    ItemIsDeleted = Qt.ItemDataRole.UserRole+3
-
-    def __init__(self, pixmap: QPixmap, parent=None) -> None:
+    def __init__(self, id_: int, pixmap: QPixmap, parent=None) -> None:
         super().__init__(pixmap, parent=parent)
+        self.id = id_
+        self.path = None
+        self.type = None
+        self.is_flipped = False
+        self.is_deleted = False
         self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsMovable, True)
         self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsSelectable, True)
         self.setShapeMode(QGraphicsPixmapItem.ShapeMode.BoundingRectShape)
@@ -22,8 +23,7 @@ class GraphicsItem(QGraphicsPixmapItem):
     def flip(self) -> None:
         mirror = self.pixmap().transformed(QTransform().scale(-1, 1))
         self.setPixmap(mirror)
-        state = not self.data(ItemIsFlipped)
-        self.setData(ItemIsFlipped, state)
+        state = not self.is_flipped
 
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem, widget: QWidget) -> None:
