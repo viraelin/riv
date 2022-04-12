@@ -23,6 +23,13 @@ class Actions:
         self.open.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.open)
 
+        self.quit = QAction(parent)
+        self.quit.triggered.connect(self.onQuit)
+        self.quit.setText("Quit")
+        self.quit.setShortcut(QKeySequence.StandardKey.Quit)
+        self.quit.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.quit)
+
         self.flip = QAction(parent)
         self.flip.triggered.connect(self.onFlip)
         self.flip.setText("Flip Selection")
@@ -35,6 +42,8 @@ class Actions:
         self.menu.addSeparator()
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
+        self.menu.addSeparator()
+        self.menu.addAction(self.quit)
 
 
     def onSave(self) -> None:
@@ -43,6 +52,10 @@ class Actions:
 
     def onOpen(self) -> None:
         self.parent.open()
+
+
+    def onQuit(self) -> None:
+        self.parent.quit()
 
 
     def onFlip(self) -> None:

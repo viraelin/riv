@@ -111,6 +111,10 @@ class MainWindow(QMainWindow):
             return
 
 
+    def quit(self) -> None:
+        self.close()
+
+
     def closeEvent(self, _event: QCloseEvent) -> None:
         pass
 
