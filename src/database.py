@@ -11,12 +11,11 @@ from graphics_item import GraphicsItem
 class Database:
 
     def __init__(self) -> None:
-        self.db = "data.riv"
-        self.createDatabase()
+        self.file_name = "data.riv"
 
 
     def createDatabase(self) -> None:
-        connection = sqlite3.connect(self.db)
+        connection = sqlite3.connect(self.file_name)
         cursor = connection.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         view(
@@ -41,7 +40,7 @@ class Database:
 
 
     def loadView(self) -> list:
-        connection = sqlite3.connect(self.db)
+        connection = sqlite3.connect(self.file_name)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM view WHERE id == 0")
         data = cursor.fetchall()[0]
@@ -49,7 +48,7 @@ class Database:
 
 
     def loadImages(self) -> list:
-        connection = sqlite3.connect(self.db)
+        connection = sqlite3.connect(self.file_name)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM images")
         data = cursor.fetchall()
@@ -57,7 +56,7 @@ class Database:
 
 
     def saveDatabase(self, view: QGraphicsView, items: list) -> None:
-        connection = sqlite3.connect(self.db)
+        connection = sqlite3.connect(self.file_name)
         cursor = connection.cursor()
 
         view_zoom = view.transform().m11()
@@ -96,7 +95,7 @@ class Database:
         scale = item.sceneTransform().m11()
         flip = item.is_flipped
 
-        connection = sqlite3.connect(self.db)
+        connection = sqlite3.connect(self.file_name)
         cursor = connection.cursor()
         cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?)",
             [item.id, x, y, z, scale, flip, image])

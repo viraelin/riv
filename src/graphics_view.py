@@ -13,8 +13,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
-from database import Database
-from actions import Actions
+import system
 from graphics_item import GraphicsItem
 
 
@@ -25,8 +24,6 @@ class GraphicsView(QGraphicsView):
     def __init__(self, scene: QGraphicsScene, parent=None) -> None:
         super().__init__(scene, parent=parent)
 
-        self.db = Database()
-        self.actions = Actions(self)
         self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
@@ -38,16 +35,9 @@ class GraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
         self.setStyleSheet("background-color: #100111111;")
 
-        self.projectLoad()
 
-
-    def projectSave(self):
-        items = self.scene().items()
-        self.db.saveDatabase(self, items)
-
-
-    def projectLoad(self):
-        image_data = self.db.loadImages()
+    def load(self):
+        image_data = system.sql.loadImages()
         for entry in image_data:
             item_id = entry[0]
             item_x = entry[1]
@@ -71,7 +61,7 @@ class GraphicsView(QGraphicsView):
             self.scene().addItem(item)
             self.id += 1
 
-        view_data = self.db.loadView()
+        view_data = system.sql.loadView()
         view_x = view_data[1]
         view_y = view_data[2]
         view_zoom = view_data[3]
@@ -132,7 +122,7 @@ class GraphicsView(QGraphicsView):
                     path = url.path()
                     item = self.createItem(path, pos)
                     self.scene().addItem(item)
-                    self.db.storeItem(item)
+                    system.sql.storeItem(item)
                 else:
                     pass
         elif mimedata.hasImage():
@@ -241,7 +231,7 @@ class GraphicsView(QGraphicsView):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         pos = self.mapToGlobal(event.pos())
-        self.actions.menu.popup(pos)
+        system.actions.menu.popup(pos)
 
 
     def updateSceneSize(self) -> None:

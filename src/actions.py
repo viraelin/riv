@@ -9,15 +9,15 @@ class Actions:
         self.parent = parent
         self.menu = QMenu(parent)
 
-        self.project_save = QAction(parent)
-        self.project_save.triggered.connect(self.onProjectSave)
-        self.project_save.setText("Save")
-        self.project_save.setShortcut(QKeySequence.StandardKey.Save)
-        self.project_save.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
-        self.parent.addAction(self.project_save)
+        self.save = QAction(parent)
+        self.save.triggered.connect(self.onSave)
+        self.save.setText("Save")
+        self.save.setShortcut(QKeySequence.StandardKey.Save)
+        self.save.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.save)
 
-        self.menu.addAction(self.project_save)
+        self.menu.addAction(self.save)
 
 
-    def onProjectSave(self) -> None:
-        self.parent.projectSave()
+    def onSave(self) -> None:
+        self.parent.save()
