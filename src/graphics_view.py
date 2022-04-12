@@ -23,6 +23,7 @@ class GraphicsView(QGraphicsView):
     def __init__(self, scene: QGraphicsScene, parent=None) -> None:
         super().__init__(scene, parent=parent)
 
+        scene.selectionChanged.connect(self.onSelectionChanged)
         self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
@@ -53,9 +54,8 @@ class GraphicsView(QGraphicsView):
             item.setScale(item_scale)
             item.setPos(item_x, item_y)
             item.setZValue(item_z_value)
-            item.is_flipped = item_is_flipped
             item.setTransformationMode(self.transformation_mode)
-            if item.is_flipped:
+            if item_is_flipped:
                 item.flip()
             self.scene().addItem(item)
             self.id += 1
@@ -75,7 +75,10 @@ class GraphicsView(QGraphicsView):
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.buttons() == Qt.MouseButton.MiddleButton:
+        if event.button() == Qt.MouseButton.RightButton:
+            # context menu
+            return
+        if event.button() == Qt.MouseButton.MiddleButton:
             self._mouse_last_pan_position = event.position()
             event.accept()
             return
@@ -238,6 +241,7 @@ class GraphicsView(QGraphicsView):
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         pos = self.mapToGlobal(event.pos())
         system.actions.menu.popup(pos)
+        event.accept()
 
 
     def updateSceneSize(self) -> None:
@@ -260,3 +264,11 @@ class GraphicsView(QGraphicsView):
             new_bottom_right.setX(widget_rect_in_scene.right())
 
         self.setSceneRect(QRectF(new_top_left, new_bottom_right))
+
+
+    def onSelectionChanged(self) -> None:
+        selected_item_count = len(self.scene().selectedItems())
+        if selected_item_count > 0:
+            system.actions.flip.setEnabled(True)
+        else:
+            system.actions.flip.setEnabled(False)

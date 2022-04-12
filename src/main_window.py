@@ -113,3 +113,9 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, _event: QCloseEvent) -> None:
         pass
+
+
+    def flipSelection(self) -> None:
+        items = self.scene.selectedItems()
+        for item in items:
+            item.flip()

@@ -23,7 +23,7 @@ class GraphicsItem(QGraphicsPixmapItem):
     def flip(self) -> None:
         mirror = self.pixmap().transformed(QTransform().scale(-1, 1))
         self.setPixmap(mirror)
-        state = not self.is_flipped
+        self.is_flipped = not self.is_flipped
 
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem, widget: QWidget) -> None:
