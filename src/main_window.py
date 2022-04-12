@@ -154,3 +154,7 @@ class MainWindow(QMainWindow):
         self.view.transformation_mode = mode
         for item in items:
             item.setTransformationMode(mode)
+
+
+    def packSelection(self) -> None:
+        self.view.packSelection()

@@ -239,7 +239,6 @@ class GraphicsView(QGraphicsView):
             item.setPos(pos)
 
         self.scene().destroyItemGroup(group)
-        self.setItemParents(items)
 
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
