@@ -20,12 +20,12 @@ class Database:
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         images(
             id INTEGER PRIMARY KEY,
-            data BLOB,
+            image BLOB,
             x INTEGER,
             y INTEGER,
             scale FLOAT,
             z_value INTEGER,
-            item_is_flipped BOOL
+            flipped BOOL
             )""")
         connection.commit()
 
@@ -38,22 +38,38 @@ class Database:
         return data
 
 
+    def saveDatabase(self, items: list) -> None:
+        connection = sqlite3.connect(self.db)
+        cursor = connection.cursor()
+        for item in items:
+            x = int(item.pos().x())
+            y = int(item.pos().y())
+            scale = item.sceneTransform().m11()
+            z_value = item.zValue()
+            flipped = item.is_flipped
+            cursor.execute("UPDATE images SET x = ? WHERE id == ?", [x, item.id])
+            cursor.execute("UPDATE images SET y = ? WHERE id == ?", [y, item.id])
+            cursor.execute("UPDATE images SET scale = ? WHERE id == ?", [scale, item.id])
+            cursor.execute("UPDATE images SET z_value = ? WHERE id == ?", [z_value, item.id])
+            cursor.execute("UPDATE images SET flipped = ? WHERE id == ?", [flipped, item.id])
+        connection.commit()
+
+
     def storeItem(self, item: GraphicsItem) -> None:
-        byte_array = QByteArray()
-        buffer = QBuffer(byte_array)
+        image = QByteArray()
+        buffer = QBuffer(image)
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         item.pixmap().save(buffer, item.type)
 
-        item_id = item.id
-        item_x = int(item.pos().x())
-        item_y = int(item.pos().y())
-        item_scale = item.sceneTransform().m11()
-        item_z_value = item.zValue()
-        item_is_flipped = item.is_flipped
+        x = int(item.pos().x())
+        y = int(item.pos().y())
+        scale = item.sceneTransform().m11()
+        z_value = item.zValue()
+        flipped = item.is_flipped
 
         connection = sqlite3.connect(self.db)
         cursor = connection.cursor()
         cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [item_id, byte_array, item_x, item_y, item_scale, item_z_value, item_is_flipped])
+            [item.id, image, x, y, scale, z_value, flipped])
         connection.commit()
         buffer.close()

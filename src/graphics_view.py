@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
 from database import Database
+from actions import Actions
 from graphics_item import GraphicsItem
 
 
@@ -25,6 +26,7 @@ class GraphicsView(QGraphicsView):
         super().__init__(scene, parent=parent)
 
         self.db = Database()
+        self.actions = Actions(self)
         self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
@@ -38,7 +40,15 @@ class GraphicsView(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
         self.updateSceneSize()
+        self.projectLoad()
 
+
+    def projectSave(self):
+        items = self.scene().items()
+        self.db.saveDatabase(items)
+
+
+    def projectLoad(self):
         data = self.db.loadDatabase()
         for entry in data:
             item_id = entry[0]
@@ -61,14 +71,6 @@ class GraphicsView(QGraphicsView):
             if item.is_flipped:
                 item.flip()
             self.scene().addItem(item)
-
-
-    def projectSave(self) -> bool:
-        return False
-
-
-    def projectLoad(self) -> bool:
-        return False
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
@@ -226,7 +228,8 @@ class GraphicsView(QGraphicsView):
 
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        pass
+        pos = self.mapToGlobal(event.pos())
+        self.actions.menu.popup(pos)
 
 
     def updateSceneSize(self) -> None:
