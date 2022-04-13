@@ -17,3 +17,12 @@ last_dialog_dir = DEFAULT_FILE_DIR
 sql: Database = None
 settings: QSettings = None
 actions: Actions = None
+
+item_ids: list[int] = []
+
+def getItemID() -> int:
+    i = 0
+    while i in item_ids:
+        i += 1
+    item_ids.append(i)
+    return i

@@ -158,3 +158,13 @@ class MainWindow(QMainWindow):
 
     def packSelection(self) -> None:
         self.view.packSelection()
+
+
+    def deleteSelection(self) -> None:
+        items = self.scene.selectedItems()
+        if not len(items) > 0:
+            return
+
+        for item in items:
+            system.sql.deleteItem(item)
+            self.scene.removeItem(item)

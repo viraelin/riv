@@ -117,3 +117,10 @@ class Database:
             [item.id, x, y, z, rotation, scale, flip, image])
         connection.commit()
         buffer.close()
+
+
+    def deleteItem(self, item: GraphicsItem) -> None:
+        connection = sqlite3.connect(self.file_path)
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM images WHERE id == ?", [item.id])
+        connection.commit()

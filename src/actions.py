@@ -67,11 +67,20 @@ class Actions:
         self.pack_selection.setText("Pack Selection")
         self.parent.addAction(self.pack_selection)
 
+        self.delete_selection = QAction(parent)
+        self.delete_selection.triggered.connect(self.onDeleteSelection)
+        self.delete_selection.setText("Delete")
+        self.delete_selection.setShortcut(QKeySequence.StandardKey.Delete)
+        self.delete_selection.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.delete_selection)
+
         self.menu.addAction(self.flip)
         self.menu.addAction(self.grayscale)
         self.menu.addAction(self.select_all)
         self.menu.addAction(self.filtering)
         self.menu.addAction(self.pack_selection)
+        self.menu.addSeparator()
+        self.menu.addAction(self.delete_selection)
         self.menu.addSeparator()
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
@@ -109,3 +118,7 @@ class Actions:
 
     def onPackSelection(self) -> None:
         self.parent.packSelection()
+
+
+    def onDeleteSelection(self) -> None:
+        self.parent.deleteSelection()

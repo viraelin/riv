@@ -25,7 +25,6 @@ class GraphicsView(QGraphicsView):
         super().__init__(scene, parent=parent)
 
         scene.selectionChanged.connect(self.onSelectionChanged)
-        self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
         self._mouse_last_rotate_position = QPointF()
@@ -67,7 +66,7 @@ class GraphicsView(QGraphicsView):
             if item_is_flipped:
                 item.flip()
             self.scene().addItem(item)
-            self.id += 1
+            system.item_ids.append(item_id)
 
         view_data = system.sql.loadView()
         view_x = view_data[1]
@@ -166,7 +165,8 @@ class GraphicsView(QGraphicsView):
 
 
     def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0) -> GraphicsItem:
-        item = GraphicsItem(self.id, QPixmap(path))
+        new_id = system.getItemID()
+        item = GraphicsItem(new_id, QPixmap(path))
         item.path = path
         item.type = imghdr.what(path)
         item.setPos(pos)
@@ -178,7 +178,6 @@ class GraphicsView(QGraphicsView):
             item.flip()
 
         self.update()
-        self.id += 1
         return item
 
 
@@ -296,8 +295,10 @@ class GraphicsView(QGraphicsView):
         selected_items = self.scene().selectedItems()
         if len(selected_items) > 0:
             system.actions.flip.setEnabled(True)
+            system.actions.delete_selection.setEnabled(True)
         else:
             system.actions.flip.setEnabled(False)
+            system.actions.delete_selection.setEnabled(False)
 
 
     def rotateSelection(self, event: QMouseEvent) -> None:
