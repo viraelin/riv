@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
         # self.setWindowTitle(f"{info.fileName()}[*]")
         # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-        # setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
         self.setCentralWidget(self.view)
         self.show()
 

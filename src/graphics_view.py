@@ -28,7 +28,8 @@ class GraphicsView(QGraphicsView):
         self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
-        self._mouse_rotate_last_position = QPointF()
+        self._mouse_last_rotate_position = QPointF()
+        self._mouse_last_scale_position = QPointF()
 
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
         self.grayscale_effect = QGraphicsColorizeEffect()
@@ -49,17 +50,19 @@ class GraphicsView(QGraphicsView):
             item_x = entry[1]
             item_y = entry[2]
             item_z_value = entry[3]
-            item_scale = entry[4]
-            item_is_flipped = entry[5]
-            item_image = entry[6]
+            item_rotation = entry[4]
+            item_scale = entry[5]
+            item_is_flipped = entry[6]
+            item_image = entry[7]
 
             pixmap = QPixmap()
             pixmap.loadFromData(item_image)
 
             item = GraphicsItem(item_id, pixmap)
-            item.setScale(item_scale)
             item.setPos(item_x, item_y)
             item.setZValue(item_z_value)
+            item.setScale(item_scale)
+            item.setRotation(math.degrees(item_rotation))
             item.setTransformationMode(self.transformation_mode)
             if item_is_flipped:
                 item.flip()
@@ -83,7 +86,11 @@ class GraphicsView(QGraphicsView):
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.buttons() == Qt.MouseButton.LeftButton:
             if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
-                self._mouse_rotate_last_position = event.position()
+                self._mouse_last_rotate_position = event.position()
+                event.accept()
+                return
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+                self._mouse_last_scale_position = event.position()
                 event.accept()
                 return
         if event.button() == Qt.MouseButton.RightButton:
@@ -104,6 +111,10 @@ class GraphicsView(QGraphicsView):
         if event.buttons() == Qt.MouseButton.LeftButton:
             if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
                 self.rotateSelection(event)
+                event.accept()
+                return
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+                self.scaleSelection(event)
                 event.accept()
                 return
         if event.buttons() == Qt.MouseButton.MiddleButton:
@@ -233,9 +244,9 @@ class GraphicsView(QGraphicsView):
         rect_sizes = []
 
         for item in items:
-            scale = item.sceneTransform().m11()
-            width = int(item.pixmap().width() * scale)
-            height = int(item.pixmap().height() * scale)
+            scale = item.scale()
+            width = int(item.boundingRect().width() * scale)
+            height = int(item.boundingRect().height() * scale)
             rect = (width, height)
             rect_sizes.append(rect)
 
@@ -295,20 +306,45 @@ class GraphicsView(QGraphicsView):
             return
 
         group = self.scene().createItemGroup(items)
-        item_center = group.boundingRect().center()
-        group.setTransformOriginPoint(item_center)
+        center = group.boundingRect().center()
+        group.setTransformOriginPoint(center)
 
         event_pos = self.mapToScene(event.position().toPoint())
-        mid_pos = group.mapToScene(group.boundingRect().center())
-        offset_pos = self.mapToScene(self._mouse_rotate_last_position.toPoint())
+        mid_pos = group.mapToScene(center)
+        offset_pos = self.mapToScene(self._mouse_last_rotate_position.toPoint())
 
         dx = event_pos - mid_pos
         ax = math.atan2(dx.y(), dx.x())
         dy = offset_pos - mid_pos
         ay = math.atan2(dy.y(), dy.x())
-        angle = math.degrees(ax - ay)
+        rotation = math.degrees(ax - ay)
 
-        group.setRotation(group.rotation() + angle)
-        self._mouse_rotate_last_position = event.position()
+        group.setRotation(group.rotation() + rotation)
 
         self.scene().destroyItemGroup(group)
+        self._mouse_last_rotate_position = event.position()
+
+
+    def scaleSelection(self, event: QMouseEvent) -> None:
+        items = self.scene().selectedItems()
+        if not len(items) > 0:
+            return
+
+        # todo: get correct transform scale
+        # group = self.scene().createItemGroup(items)
+        # center = group.boundingRect().center()
+        # group.setTransformOriginPoint(center)
+
+        event_pos = self.mapToScene(event.position().toPoint())
+        offset_pos = self.mapToScene(self._mouse_last_scale_position.toPoint())
+        factor = 0.0005
+        scale = (event_pos - offset_pos).x() * factor
+
+        for item in items:
+            item_center = item.boundingRect().center()
+            # item.setTransformOriginPoint(item_center)
+            item.setScale(item.scale() + scale)
+
+        # group.setScale(group.scale() + scale)
+        # self.scene().destroyItemGroup(group)
+        self._mouse_last_scale_position = event.position()

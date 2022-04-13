@@ -1,6 +1,8 @@
 # Copyright (C) 2020-2022 viraelin
 # License: GPLv3.0
 
+import math
+
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
@@ -50,3 +52,8 @@ class GraphicsItem(QGraphicsPixmapItem):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(pen)
         painter.drawRect(rect)
+
+
+    def getRotation(self) -> float:
+        t = self.sceneTransform()
+        return math.atan2(t.m12(), t.m11())

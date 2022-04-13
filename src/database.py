@@ -26,7 +26,7 @@ class Database:
             id INTEGER PRIMARY KEY,
             x INTEGER,
             y INTEGER,
-            scale FLOAT
+            scale REAL
             )""")
         cursor.execute("INSERT OR IGNORE INTO view VALUES (?, ?, ?, ?)",
             [0, 0, 0, 1.0])
@@ -36,7 +36,8 @@ class Database:
             x INTEGER,
             y INTEGER,
             z INTEGER,
-            scale FLOAT,
+            rotation REAL,
+            scale REAL,
             flip BOOL,
             image BLOB
             )""")
@@ -74,7 +75,7 @@ class Database:
         connection.commit()
 
 
-    def updateItems(self, items: list) -> None:
+    def updateItems(self, items: list[GraphicsItem]) -> None:
         connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
 
@@ -82,11 +83,14 @@ class Database:
             x = int(item.pos().x())
             y = int(item.pos().y())
             z = item.zValue()
-            scale = item.sceneTransform().m11()
+            scale = item.scale()
             flip = item.is_flipped
+            rotation = item.getRotation()
+
             cursor.execute("UPDATE images SET x = ? WHERE id == ?", [x, item.id])
             cursor.execute("UPDATE images SET y = ? WHERE id == ?", [y, item.id])
             cursor.execute("UPDATE images SET z = ? WHERE id == ?", [z, item.id])
+            cursor.execute("UPDATE images SET rotation = ? WHERE id == ?", [rotation, item.id])
             cursor.execute("UPDATE images SET scale = ? WHERE id == ?", [scale, item.id])
             cursor.execute("UPDATE images SET flip = ? WHERE id == ?", [flip, item.id])
 
@@ -103,12 +107,13 @@ class Database:
         x = int(item.pos().x())
         y = int(item.pos().y())
         z = item.zValue()
-        scale = item.sceneTransform().m11()
+        scale = item.scale()
         flip = item.is_flipped
+        rotation = item.getRotation()
 
         connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [item.id, x, y, z, scale, flip, image])
+        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [item.id, x, y, z, rotation, scale, flip, image])
         connection.commit()
         buffer.close()
