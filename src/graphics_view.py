@@ -2,6 +2,7 @@
 # License: GPLv3.0
 
 import os
+import math
 import json
 import zipfile
 import tempfile
@@ -27,12 +28,13 @@ class GraphicsView(QGraphicsView):
         self.id = 0
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
+        self._mouse_rotate_last_position = QPointF()
+
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
         self.grayscale_effect = QGraphicsColorizeEffect()
         self.grayscale_effect.setColor(0)
         self.grayscale_effect.setEnabled(False)
         self.setGraphicsEffect(self.grayscale_effect)
-
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
@@ -79,6 +81,11 @@ class GraphicsView(QGraphicsView):
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
+                self._mouse_rotate_last_position = event.position()
+                event.accept()
+                return
         if event.button() == Qt.MouseButton.RightButton:
             # context menu
             return
@@ -94,6 +101,11 @@ class GraphicsView(QGraphicsView):
 
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
+                self.rotateSelection(event)
+                event.accept()
+                return
         if event.buttons() == Qt.MouseButton.MiddleButton:
             self.panView(event)
             event.accept()
@@ -270,8 +282,33 @@ class GraphicsView(QGraphicsView):
 
 
     def onSelectionChanged(self) -> None:
-        selected_item_count = len(self.scene().selectedItems())
-        if selected_item_count > 0:
+        selected_items = self.scene().selectedItems()
+        if len(selected_items) > 0:
             system.actions.flip.setEnabled(True)
         else:
             system.actions.flip.setEnabled(False)
+
+
+    def rotateSelection(self, event: QMouseEvent) -> None:
+        items = self.scene().selectedItems()
+        if not len(items) > 0:
+            return
+
+        group = self.scene().createItemGroup(items)
+        item_center = group.boundingRect().center()
+        group.setTransformOriginPoint(item_center)
+
+        event_pos = self.mapToScene(event.position().toPoint())
+        mid_pos = group.mapToScene(group.boundingRect().center())
+        offset_pos = self.mapToScene(self._mouse_rotate_last_position.toPoint())
+
+        dx = event_pos - mid_pos
+        ax = math.atan2(dx.y(), dx.x())
+        dy = offset_pos - mid_pos
+        ay = math.atan2(dy.y(), dy.x())
+        angle = math.degrees(ax - ay)
+
+        group.setRotation(group.rotation() + angle)
+        self._mouse_rotate_last_position = event.position()
+
+        self.scene().destroyItemGroup(group)
