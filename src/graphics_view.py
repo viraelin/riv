@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
 import system
+import commands
 from graphics_item import GraphicsItem
 
 
@@ -25,6 +26,7 @@ class GraphicsView(QGraphicsView):
         super().__init__(scene, parent=parent)
 
         scene.selectionChanged.connect(self.onSelectionChanged)
+        self._mouse_last_press_position = QPointF()
         self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
         self._mouse_last_rotate_position = QPointF()
@@ -83,7 +85,8 @@ class GraphicsView(QGraphicsView):
 
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.buttons() == Qt.MouseButton.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._mouse_last_press_position = event.position()
             if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
                 self._mouse_last_rotate_position = event.position()
                 event.accept()
@@ -104,6 +107,14 @@ class GraphicsView(QGraphicsView):
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         super().mouseReleaseEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            items = self.scene().selectedItems()
+            if len(items) > 0:
+                p1 = self.mapToScene(self._mouse_last_press_position.toPoint())
+                p2 = self.mapToScene(event.position().toPoint())
+                offset = p2 - p1
+                if offset:
+                    system.undo_stack.push(commands.Move(items, offset, True))
 
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:

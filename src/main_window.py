@@ -20,9 +20,12 @@ class MainWindow(QMainWindow):
 
         system.sql = system.Database()
         system.settings = QSettings(self)
+        system.undo_stack = QUndoStack(self)
+        system.undo_stack.setUndoLimit(50)
+        system.undo_stack.cleanChanged.connect(self.onUndoStackCleanChanged)
         system.actions = system.Actions(self)
 
-        # self.setWindowTitle(f"{info.fileName()}[*]")
+        self.setWindowTitle("[*]")
         # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
         self.setCentralWidget(self.view)
@@ -168,3 +171,7 @@ class MainWindow(QMainWindow):
         for item in items:
             system.sql.deleteItem(item)
             self.scene.removeItem(item)
+
+
+    def onUndoStackCleanChanged(self, state: bool) -> None:
+        self.setWindowModified(not state)

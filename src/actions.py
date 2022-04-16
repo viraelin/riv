@@ -5,12 +5,28 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMenu, QWidgetAction)
 from PyQt6.QtGui import (QAction, QKeySequence)
 
+import system
+
 
 class Actions:
 
     def __init__(self, parent) -> None:
         self.parent = parent
         self.menu = QMenu(parent)
+
+        self.undo = QAction(parent)
+        self.undo.triggered.connect(self.onUndo)
+        self.undo.setText("Undo")
+        self.undo.setShortcut(QKeySequence.StandardKey.Undo)
+        self.undo.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.undo)
+
+        self.redo = QAction(parent)
+        self.redo.triggered.connect(self.onRedo)
+        self.redo.setText("Redo")
+        self.redo.setShortcut(QKeySequence.StandardKey.Redo)
+        self.redo.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.redo)
 
         self.save = QAction(parent)
         self.save.triggered.connect(self.onSave)
@@ -74,6 +90,9 @@ class Actions:
         self.delete_selection.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.delete_selection)
 
+        self.menu.addAction(self.undo)
+        self.menu.addAction(self.redo)
+        self.menu.addSeparator()
         self.menu.addAction(self.flip)
         self.menu.addAction(self.grayscale)
         self.menu.addAction(self.select_all)
@@ -122,3 +141,11 @@ class Actions:
 
     def onDeleteSelection(self) -> None:
         self.parent.deleteSelection()
+
+
+    def onUndo(self) -> None:
+        system.undo_stack.undo()
+
+
+    def onRedo(self) -> None:
+        system.undo_stack.redo()

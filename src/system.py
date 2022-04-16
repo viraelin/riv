@@ -17,6 +17,7 @@ last_dialog_dir = DEFAULT_FILE_DIR
 sql: Database = None
 settings: QSettings = None
 actions: Actions = None
+undo_stack: QUndoStack = None
 
 item_ids: list[int] = []
 
