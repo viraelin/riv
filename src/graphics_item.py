@@ -34,9 +34,8 @@ class GraphicsItem(QGraphicsPixmapItem):
 
         if self.isSelected():
             # override selection border
-            custom_option = QStyleOptionGraphicsItem(option)
-            custom_option.state = QStyle.StateFlag.State_None
-            super().paint(painter, custom_option, widget)
+            option.state = QStyle.StateFlag.State_None
+            super().paint(painter, option, widget)
             width = 2
             color = QColor("#33CCCC")
         else:
