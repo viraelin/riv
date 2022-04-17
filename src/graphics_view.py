@@ -27,10 +27,7 @@ class GraphicsView(QGraphicsView):
 
         scene.selectionChanged.connect(self.onSelectionChanged)
         self._mouse_last_press_position = QPointF()
-        self._mouse_last_pan_position = QPointF()
         self._mouse_last_drop_position = QPointF()
-        self._mouse_last_rotate_position = QPointF()
-        self._mouse_last_scale_position = QPointF()
 
         self.transformation_mode = Qt.TransformationMode.SmoothTransformation
         self.grayscale_effect = QGraphicsColorizeEffect()
@@ -88,18 +85,16 @@ class GraphicsView(QGraphicsView):
         if event.button() == Qt.MouseButton.LeftButton:
             self._mouse_last_press_position = event.position()
             if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
-                self._mouse_last_rotate_position = event.position()
                 event.accept()
                 return
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-                self._mouse_last_scale_position = event.position()
                 event.accept()
                 return
         if event.button() == Qt.MouseButton.RightButton:
             # context menu
             return
         if event.button() == Qt.MouseButton.MiddleButton:
-            self._mouse_last_pan_position = event.position()
+            self._mouse_last_press_position = event.position()
             event.accept()
             return
         super().mousePressEvent(event)
@@ -210,11 +205,11 @@ class GraphicsView(QGraphicsView):
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
         self.updateSceneSize()
-        old_pos = self.mapToScene(self._mouse_last_pan_position.toPoint())
+        old_pos = self.mapToScene(self._mouse_last_press_position.toPoint())
         new_pos = self.mapToScene(event.position().toPoint())
         delta = new_pos - old_pos
         self.translate(delta.x(), delta.y())
-        self._mouse_last_pan_position = event.position()
+        self._mouse_last_press_position = event.position()
 
 
     def zoomView(self, event: QWheelEvent) -> None:
@@ -323,7 +318,7 @@ class GraphicsView(QGraphicsView):
 
         event_pos = self.mapToScene(event.position().toPoint())
         mid_pos = group.mapToScene(center)
-        offset_pos = self.mapToScene(self._mouse_last_rotate_position.toPoint())
+        offset_pos = self.mapToScene(self._mouse_last_press_position.toPoint())
 
         dx = event_pos - mid_pos
         ax = math.atan2(dx.y(), dx.x())
@@ -334,7 +329,7 @@ class GraphicsView(QGraphicsView):
         group.setRotation(group.rotation() + rotation)
 
         self.scene().destroyItemGroup(group)
-        self._mouse_last_rotate_position = event.position()
+        self._mouse_last_press_position = event.position()
 
 
     def scaleSelection(self, event: QMouseEvent) -> None:
@@ -348,7 +343,7 @@ class GraphicsView(QGraphicsView):
         # group.setTransformOriginPoint(center)
 
         event_pos = self.mapToScene(event.position().toPoint())
-        offset_pos = self.mapToScene(self._mouse_last_scale_position.toPoint())
+        offset_pos = self.mapToScene(self._mouse_last_press_position.toPoint())
         factor = 0.0005
         scale = (event_pos - offset_pos).x() * factor
 
@@ -359,4 +354,4 @@ class GraphicsView(QGraphicsView):
 
         # group.setScale(group.scale() + scale)
         # self.scene().destroyItemGroup(group)
-        self._mouse_last_scale_position = event.position()
+        self._mouse_last_press_position = event.position()
