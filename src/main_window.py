@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.setFiltering(is_filtering)
 
         # project
-        if file_path != default_file_path:
+        if os.path.isfile(file_path):
             system.sql.file_path = file_path
             system.sql.createDatabase()
             self.view.load()
