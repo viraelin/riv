@@ -5,22 +5,14 @@
 
 
 ## Features
-- Modifications are non-destructive. `riv` simply displays images.
 - Add images with drag and drop from anywhere
-- Pan/Zoom
-- Color/Grayscale
-- Flip/Scale/Rotate
+- Move/Scale/Rotate/Flip images
+- Pan/Zoom canvas
+- Color/Grayscale toggle
 - Save/Load
 - Simple rectangle packing
-- Minimal user interface
-
-
-## Usage
-- Drag and drop images onto canvas
-- Select and move items with mouse
-- Pan with middle click
-- Zoom with mouse wheel
-- Right click for menu
+- Modifications are non-destructive, `riv` simply displays images
+- Minimal interface
 
 
 ## Data
