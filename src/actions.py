@@ -95,6 +95,11 @@ class Actions:
         self.reset_transform.setText("Reset Transform")
         self.parent.addAction(self.reset_transform)
 
+        self.import_images = QAction(parent)
+        self.import_images.triggered.connect(self.onImportImages)
+        self.import_images.setText("Import Images")
+        self.parent.addAction(self.import_images)
+
         self.menu.addAction(self.undo)
         self.menu.addAction(self.redo)
         self.menu.addSeparator()
@@ -109,6 +114,7 @@ class Actions:
         self.menu.addSeparator()
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
+        self.menu.addAction(self.import_images)
         self.menu.addSeparator()
         self.menu.addAction(self.quit)
 
@@ -159,3 +165,7 @@ class Actions:
 
     def onResetTransform(self) -> None:
         self.parent.resetSelectionTransforms()
+
+
+    def onImportImages(self) -> None:
+        self.parent.importImages()

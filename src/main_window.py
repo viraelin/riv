@@ -193,3 +193,26 @@ class MainWindow(QMainWindow):
             rotation = math.degrees(item.getRotation())
             group.setRotation(0.0 - rotation)
             self.scene.destroyItemGroup(group)
+
+
+    def importImages(self) -> None:
+        image_filter = "Images (*.png *.jpg *.jpeg)"
+        file_paths, _selected_filter = QFileDialog().getOpenFileNames(
+            self,
+            "Import Images",
+            system.last_dialog_dir,
+            image_filter
+        )
+
+        if len(file_paths) > 0:
+            can_store = False
+            if system.sql.file_path != "":
+                can_store = True
+            pos = QPointF(system.actions.menu.pos())
+            path, _ = os.path.split(file_paths[0])
+            system.last_dialog_dir = path
+            for file_path in file_paths:
+                item = self.view.createItem(file_path, pos)
+                self.scene.addItem(item)
+                if can_store:
+                    system.sql.storeItem(item)
