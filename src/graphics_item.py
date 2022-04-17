@@ -17,9 +17,19 @@ class GraphicsItem(QGraphicsPixmapItem):
         self.type = None
         self.is_flipped = False
         self.is_deleted = False
-        self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsMovable, True)
-        self.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setShapeMode(QGraphicsPixmapItem.ShapeMode.BoundingRectShape)
+
+
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: any) -> any:
+        if self.scene():
+            if change == QGraphicsItem.GraphicsItemChange.ItemSelectedHasChanged:
+                self.sendToFront()
+            elif change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
+                self.sendToFront()
+        return super().itemChange(change, value)
 
 
     def flip(self) -> None:
@@ -56,3 +66,11 @@ class GraphicsItem(QGraphicsPixmapItem):
     def getRotation(self) -> float:
         t = self.sceneTransform()
         return math.atan2(t.m12(), t.m11())
+
+
+    def sendToFront(self) -> None:
+        max_z = 0
+        colliding_items = self.collidingItems(Qt.ItemSelectionMode.IntersectsItemBoundingRect)
+        for colliding_item in colliding_items:
+            max_z = max(max_z, colliding_item.zValue())
+        self.setZValue(max_z + 1)
