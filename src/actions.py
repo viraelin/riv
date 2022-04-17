@@ -54,7 +54,6 @@ class Actions:
         self.flip.setText("Flip Selection")
         self.flip.setShortcut(QKeySequence(Qt.Key.Key_M))
         self.flip.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
-        self.flip.setEnabled(False)
         self.parent.addAction(self.flip)
 
         self.grayscale = QWidgetAction(parent)
@@ -117,6 +116,15 @@ class Actions:
         self.menu.addAction(self.import_images)
         self.menu.addSeparator()
         self.menu.addAction(self.quit)
+
+        self.setState(False)
+
+
+    def setState(self, state: bool) -> None:
+        self.flip.setEnabled(state)
+        self.delete_selection.setEnabled(state)
+        self.reset_transform.setEnabled(state)
+        self.pack_selection.setEnabled(state)
 
 
     def onSave(self) -> None:

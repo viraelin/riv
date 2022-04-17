@@ -300,11 +300,9 @@ class GraphicsView(QGraphicsView):
     def onSelectionChanged(self) -> None:
         selected_items = self.scene().selectedItems()
         if len(selected_items) > 0:
-            system.actions.flip.setEnabled(True)
-            system.actions.delete_selection.setEnabled(True)
+            system.actions.setState(True)
         else:
-            system.actions.flip.setEnabled(False)
-            system.actions.delete_selection.setEnabled(False)
+            system.actions.setState(False)
 
 
     def rotateSelection(self, event: QMouseEvent) -> None:
