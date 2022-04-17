@@ -90,6 +90,11 @@ class Actions:
         self.delete_selection.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.delete_selection)
 
+        self.reset_transform = QAction(parent)
+        self.reset_transform.triggered.connect(self.onResetTransform)
+        self.reset_transform.setText("Reset Transform")
+        self.parent.addAction(self.reset_transform)
+
         self.menu.addAction(self.undo)
         self.menu.addAction(self.redo)
         self.menu.addSeparator()
@@ -98,6 +103,7 @@ class Actions:
         self.menu.addAction(self.select_all)
         self.menu.addAction(self.filtering)
         self.menu.addAction(self.pack_selection)
+        self.menu.addAction(self.reset_transform)
         self.menu.addSeparator()
         self.menu.addAction(self.delete_selection)
         self.menu.addSeparator()
@@ -149,3 +155,7 @@ class Actions:
 
     def onRedo(self) -> None:
         system.undo_stack.redo()
+
+
+    def onResetTransform(self) -> None:
+        self.parent.resetSelectionTransforms()

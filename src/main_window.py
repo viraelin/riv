@@ -2,6 +2,7 @@
 # License: GPLv3.0
 
 import os
+import math
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
@@ -175,3 +176,20 @@ class MainWindow(QMainWindow):
 
     def onUndoStackCleanChanged(self, state: bool) -> None:
         self.setWindowModified(not state)
+
+
+    def resetSelectionTransforms(self) -> None:
+        items = self.scene.selectedItems()
+        if not len(items) > 0:
+            return
+
+        for item in items:
+            scale = item.scale() * 1.0/item.scale()
+            item.setScale(scale)
+
+            group = self.scene.createItemGroup([item])
+            center = group.boundingRect().center()
+            group.setTransformOriginPoint(center)
+            rotation = math.degrees(item.getRotation())
+            group.setRotation(0.0 - rotation)
+            self.scene.destroyItemGroup(group)
