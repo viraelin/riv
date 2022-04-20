@@ -138,10 +138,11 @@ class MainWindow(QMainWindow):
             else:
                 return
 
+        default_file_path = os.path.join(system.last_dialog_dir, system.DEFAULT_FILE_NAME)
         file_path, _selected_filter = QFileDialog().getSaveFileName(
             self,
             "New Project",
-            system.last_dialog_dir,
+            default_file_path,
             system.PROJECT_FILTER
         )
 
@@ -149,25 +150,25 @@ class MainWindow(QMainWindow):
             system.last_dialog_dir, _ = os.path.split(file_path)
             project_ext = ".riv"
 
-            # OS responsibility, but:
-            result = QMessageBox().warning(
-                self,
-                "Overwrite File",
-                f"Overwrite contents of '{file_path}'?",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-                QMessageBox.StandardButton.Ok
-            )
-
-            if result != QMessageBox.StandardButton.Ok:
-                return
-
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-
             name, ext = os.path.splitext(file_path)
             if ext != project_ext:
                 ext = project_ext
                 file_path = name+ext
+
+            if os.path.isfile(file_path):
+                # OS responsibility, but:
+                result = QMessageBox().warning(
+                    self,
+                    "Overwrite File",
+                    f"Overwrite contents of '{file_path}'?",
+                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+                    QMessageBox.StandardButton.Ok
+                )
+
+                if result != QMessageBox.StandardButton.Ok:
+                    return
+
+                os.remove(file_path)
 
             self.loadFile(file_path)
 
