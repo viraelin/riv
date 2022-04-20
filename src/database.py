@@ -33,7 +33,7 @@ class Database:
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         images(
             id INTEGER PRIMARY KEY,
-            path STRING,
+            path TEXT,
             ctime REAL,
             mtime REAL,
             x INTEGER,
