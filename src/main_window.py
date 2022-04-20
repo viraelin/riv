@@ -212,7 +212,4 @@ class MainWindow(QMainWindow):
             path, _ = os.path.split(file_paths[0])
             system.last_dialog_dir = path
             for file_path in file_paths:
-                item = self.view.createItem(file_path, pos)
-                self.scene.addItem(item)
-                if can_store:
-                    system.sql.storeItem(item)
+                self.view.createItem(file_path, pos, can_store=can_store)

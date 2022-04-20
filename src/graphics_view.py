@@ -3,12 +3,12 @@
 
 import os
 import math
-import json
-import zipfile
 import tempfile
 import rpack
-import imghdr
+import shutil
+import urllib.request
 
+from PIL import (Image, UnidentifiedImageError)
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
@@ -160,21 +160,35 @@ class GraphicsView(QGraphicsView):
             for url in urls:
                 if url.isLocalFile():
                     path = url.path()
-                    item = self.createItem(path, pos)
-                    self.scene().addItem(item)
-                    if can_store:
-                        system.sql.storeItem(item)
+                    self.createItem(path, pos, can_store=can_store)
                 else:
-                    pass
+                    s_url = url.url()
+                    with urllib.request.urlopen(s_url) as response:
+                        with tempfile.NamedTemporaryFile() as temp_file:
+                            shutil.copyfileobj(response, temp_file)
+                            path = temp_file.name
+                            self.createItem(path, pos, url=s_url, can_store=can_store)
         elif mimedata.hasImage():
             print("image: ")
 
 
-    def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0) -> GraphicsItem:
+    def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0, url="", can_store=False) -> GraphicsItem:
+        file_type = None
+        try:
+            img = Image.open(path)
+            file_type = img.format
+        except UnidentifiedImageError:
+            return None
+
+        basename = os.path.basename(path)
+        if url != "":
+            basename = os.path.basename(url)
+
         new_id = system.getItemID()
+
         item = GraphicsItem(new_id, QPixmap(path))
-        item.path = path
-        item.type = imghdr.what(path)
+        item.path = basename
+        item.type = file_type
         item.setPos(pos)
         item.setScale(scale)
         item.setZValue(z_value)
@@ -183,20 +197,12 @@ class GraphicsView(QGraphicsView):
         if is_flipped:
             item.flip()
 
-        self.update()
+        self.scene().addItem(item)
+
+        if can_store:
+            system.sql.storeItem(item)
+
         return item
-
-
-    def createItems(self, paths: list, origin: QPointF) -> None:
-        self.scene().clearSelection()
-        item_count = len(paths)
-
-        for i in range(0, item_count):
-            path = paths[i]
-            item = self.createItem(path, origin)
-            item.setSelected(True)
-
-        self.packSelection()
 
 
     def panView(self, event: QMouseEvent) -> None:
