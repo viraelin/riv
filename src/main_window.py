@@ -128,8 +128,28 @@ class MainWindow(QMainWindow):
         self.close()
 
 
-    def closeEvent(self, _event: QCloseEvent) -> None:
-        pass
+    def closeEvent(self, event: QCloseEvent) -> None:
+        if self.isWindowModified():
+            result = self.notifyUnsavedChanges()
+            if result == QMessageBox.StandardButton.Save:
+                self.save()
+                event.accept()
+            elif result == QMessageBox.StandardButton.Discard:
+                event.accept()
+            elif result == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+
+
+    def notifyUnsavedChanges(self) -> QMessageBox.StandardButton:
+        result = QMessageBox().warning(
+            self,
+            "Quit",
+            "The document has unsaved changes.\nDo you want to save changes?",
+            QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Save
+        )
+
+        return result
 
 
     def flipSelection(self) -> None:
