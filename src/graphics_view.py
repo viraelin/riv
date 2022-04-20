@@ -198,6 +198,8 @@ class GraphicsView(QGraphicsView):
             item.flip()
 
         self.scene().addItem(item)
+        center = item.boundingRect().center()
+        item.setPos(item.pos() - center)
 
         if can_store:
             system.sql.storeItem(item)
