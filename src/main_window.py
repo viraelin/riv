@@ -135,6 +135,8 @@ class MainWindow(QMainWindow):
                 pass
             elif result == QMessageBox.StandardButton.Cancel:
                 return
+            else:
+                return
 
         file_path, _selected_filter = QFileDialog().getSaveFileName(
             self,
@@ -145,6 +147,21 @@ class MainWindow(QMainWindow):
 
         if file_path:
             project_ext = ".riv"
+
+            # OS responsibility, but:
+            result = QMessageBox().warning(
+                self,
+                "Overwrite File",
+                f"Overwrite contents of '{file_path}'?",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Ok
+            )
+
+            if result != QMessageBox.StandardButton.Ok:
+                return
+
+            if os.path.isfile(file_path):
+                os.remove(file_path)
 
             name, ext = os.path.splitext(file_path)
             if ext != project_ext:
@@ -167,6 +184,8 @@ class MainWindow(QMainWindow):
             elif result == QMessageBox.StandardButton.Discard:
                 event.accept()
             elif result == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+            else:
                 event.ignore()
 
 
