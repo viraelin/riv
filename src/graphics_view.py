@@ -7,6 +7,7 @@ import tempfile
 import rpack
 import shutil
 import urllib.request
+import time
 
 from PIL import (Image, UnidentifiedImageError)
 from PyQt6.QtCore import *
@@ -45,20 +46,28 @@ class GraphicsView(QGraphicsView):
         image_data = system.sql.loadImages()
         for entry in image_data:
             item_id = entry[0]
+
             item_path = entry[1]
-            item_x = entry[2]
-            item_y = entry[3]
-            item_z_value = entry[4]
-            item_rotation = entry[5]
-            item_scale = entry[6]
-            item_is_flipped = entry[7]
-            item_image = entry[8]
+            item_ctime = entry[2]
+            item_mtime = entry[3]
+
+            item_x = entry[4]
+            item_y = entry[5]
+            item_z_value = entry[6]
+            item_rotation = entry[7]
+            item_scale = entry[8]
+            item_is_flipped = entry[9]
+            item_image = entry[10]
 
             pixmap = QPixmap()
             pixmap.loadFromData(item_image)
 
             item = GraphicsItem(item_id, pixmap)
+
             item.path = item_path
+            item.ctime = item_ctime
+            item.mtime = item_mtime
+
             item.setPos(item_x, item_y)
             item.setZValue(item_z_value)
             item.setScale(item_scale)
@@ -198,7 +207,11 @@ class GraphicsView(QGraphicsView):
         new_id = system.getItemID()
 
         item = GraphicsItem(new_id, QPixmap(path))
+
         item.path = basename
+        item.mtime = os.path.getmtime(path)
+        item.ctime = time.time()
+
         item.type = file_type
         item.setPos(pos)
         item.setScale(scale)
