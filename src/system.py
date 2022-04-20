@@ -5,7 +5,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
-from database import Database
+from database import (Database, ItemLoadWorker, ItemDropWorker)
 from actions import Actions
 
 
@@ -18,6 +18,12 @@ sql: Database = None
 settings: QSettings = None
 actions: Actions = None
 undo_stack: QUndoStack = None
+
+item_load_thread: QThread = None
+item_load_worker: ItemLoadWorker = None
+
+item_drop_thread: QThread = None
+item_drop_worker: ItemDropWorker = None
 
 item_ids: list[int] = []
 

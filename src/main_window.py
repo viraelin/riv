@@ -11,6 +11,7 @@ from PyQt6.QtGui import *
 
 import system
 from graphics_view import GraphicsView
+from graphics_item import GraphicsItem
 
 
 class MainWindow(QMainWindow):
@@ -26,6 +27,29 @@ class MainWindow(QMainWindow):
         system.undo_stack.setUndoLimit(50)
         system.undo_stack.cleanChanged.connect(self.onUndoStackCleanChanged)
         system.actions = system.Actions(self)
+
+        system.item_load_thread = QThread()
+        system.item_load_worker = system.ItemLoadWorker()
+        system.item_load_worker.view = self.view
+        system.item_load_worker.moveToThread(system.item_load_thread)
+        system.item_load_worker.finished.connect(system.item_load_thread.quit)
+        system.item_load_worker.progress.connect(self.onItemLoadWorkerProgress)
+        system.item_load_worker.finished.connect(self.onItemLoadWorkerFinished)
+        system.item_load_thread.started.connect(system.item_load_worker.run)
+
+        system.item_drop_thread = QThread()
+        system.item_drop_worker = system.ItemDropWorker()
+        system.item_drop_worker.view = self.view
+        system.item_drop_worker.moveToThread(system.item_drop_thread)
+        system.item_drop_worker.finished.connect(system.item_drop_thread.quit)
+        system.item_drop_worker.finished.connect(self.onItemDropWorkerFinished)
+        system.item_drop_worker.progress.connect(self.onItemDropWorkerProgress)
+        system.item_drop_thread.started.connect(system.item_drop_worker.run)
+
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setValue(0)
+        self.progress_bar.hide()
 
         self.setWindowTitle("[*]")
         # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
@@ -334,3 +358,30 @@ class MainWindow(QMainWindow):
             atime = time.time()
             mtime = item.mtime
             os.utime(file_name, (atime, mtime))
+
+
+    def onItemLoadWorkerProgress(self, item: GraphicsItem, value: int, total: int) -> None:
+        self.scene.addItem(item)
+        self.progress_bar.setMaximum(total)
+        self.progress_bar.setValue(value)
+        self.view.update()
+
+
+    def onItemLoadWorkerFinished(self) -> None:
+        self.progress_bar.hide()
+
+    
+    def onItemDropWorkerProgress(self, item: GraphicsItem, value: int, total: int) -> None:
+        self.scene.addItem(item)
+        self.progress_bar.setMaximum(total)
+        self.progress_bar.setValue(value)
+        self.view.update()
+
+
+    def onItemDropWorkerFinished(self, result: int, items: list) -> None:
+        if len(items) > 1:
+            self.view.scene().clearSelection()
+            for item in items:
+                item.setSelected(True)
+            self.view.packSelection()
+        self.progress_bar.hide()

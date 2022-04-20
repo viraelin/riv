@@ -2,13 +2,23 @@
 # License: GPLv3.0
 
 import os
-import tempfile
 import sqlite3
+import math
+
+import tempfile
+import rpack
+import shutil
+import urllib.request
+import time
+
+from PIL import (Image, UnidentifiedImageError)
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
+import system
+from graphics_view import GraphicsView
 from graphics_item import GraphicsItem
 
 
@@ -143,3 +153,107 @@ class Database:
         cursor.execute("SELECT image FROM images WHERE id == ?", [item.id])
         data = cursor.fetchall()[0][0]
         return data
+
+
+class ItemLoadWorker(QObject):
+
+    finished = pyqtSignal(int)
+    progress = pyqtSignal(GraphicsItem, int, int)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent=parent)
+        # self.items: list[GraphicsItem] = None
+        self.view: GraphicsView = None
+
+
+    def run(self) -> None:
+        image_data = system.sql.loadImages()
+        total = len(image_data)
+
+        i = 1
+        for entry in image_data:
+            item_id = entry["id"]
+
+            item_x = entry["x"]
+            item_y = entry["y"]
+            item_z_value = entry["z"]
+            item_rotation = entry["rotation"]
+            item_scale = entry["scale"]
+            item_is_flipped = entry["flip"]
+            item_image = entry["image"]
+
+            pixmap = QPixmap()
+            pixmap.loadFromData(item_image)
+
+            item = GraphicsItem(item_id, pixmap)
+
+            item.path = entry["path"]
+            item.type = entry["type"]
+            item.ctime = entry["ctime"]
+            item.mtime = entry["mtime"]
+
+            item.setPos(item_x, item_y)
+            item.setZValue(item_z_value)
+            item.setScale(item_scale)
+            item.setRotation(math.degrees(item_rotation))
+            item.setTransformationMode(self.view.transformation_mode)
+            if item_is_flipped:
+                item.flip()
+            # self.view.scene().addItem(item)
+            system.item_ids.append(item_id)
+
+            self.progress.emit(item, i, total)
+            i += 1
+        
+        self.finished.emit(0)
+
+
+class ItemDropWorker(QObject):
+
+    finished = pyqtSignal(int, list)
+    progress = pyqtSignal(GraphicsItem, int, int)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent=parent)
+        self.view: GraphicsView = None
+        self.urls = None
+        self.pos = None
+
+
+    def run(self) -> None:
+        i = 1
+
+        urls = self.urls
+        pos = self.pos
+        # print("urls: ", urls)
+
+        can_store = False
+        if system.sql.file_path != "":
+            can_store = True
+
+        items = []
+        total = len(urls)
+        for url in urls:
+            if url.isLocalFile():
+                path = url.path()
+                item = self.view.createItem(path, pos, can_store=can_store, add_to_scene=False)
+                items.append(item)
+                self.progress.emit(item, i, total)
+                i += 1
+            else:
+                s_url = url.url()
+                with urllib.request.urlopen(s_url) as response:
+                    with tempfile.NamedTemporaryFile() as temp_file:
+                        shutil.copyfileobj(response, temp_file)
+                        path = temp_file.name
+                        item = self.view.createItem(path, pos, url=s_url, can_store=can_store, add_to_scene=False)
+                        items.append(item)
+                        self.progress.emit(item, i, total)
+                        i += 1
+
+        self.finished.emit(0, items)
+
+
+    def setEventData(self, data, pos) -> None:
+        self.data = data
+        self.pos = pos

@@ -43,37 +43,9 @@ class GraphicsView(QGraphicsView):
 
 
     def load(self):
-        image_data = system.sql.loadImages()
-        for entry in image_data:
-            item_id = entry["id"]
-
-            item_x = entry["x"]
-            item_y = entry["y"]
-            item_z_value = entry["z"]
-            item_rotation = entry["rotation"]
-            item_scale = entry["scale"]
-            item_is_flipped = entry["flip"]
-            item_image = entry["image"]
-
-            pixmap = QPixmap()
-            pixmap.loadFromData(item_image)
-
-            item = GraphicsItem(item_id, pixmap)
-
-            item.path = entry["path"]
-            item.type = entry["type"]
-            item.ctime = entry["ctime"]
-            item.mtime = entry["mtime"]
-
-            item.setPos(item_x, item_y)
-            item.setZValue(item_z_value)
-            item.setScale(item_scale)
-            item.setRotation(math.degrees(item_rotation))
-            item.setTransformationMode(self.transformation_mode)
-            if item_is_flipped:
-                item.flip()
-            self.scene().addItem(item)
-            system.item_ids.append(item_id)
+        system.item_load_thread.start()
+        # todo
+        self.parent().progress_bar.show()
 
         view_data = system.sql.loadView()
         view_x = view_data["x"]
@@ -154,42 +126,23 @@ class GraphicsView(QGraphicsView):
 
 
     def dropEvent(self, event: QDropEvent) -> None:
+        # todo: cannot directly send event/mimedata to worker
         mimedata = event.mimeData()
         pos = self.mapToScene(event.position().toPoint())
         self._mouse_last_drop_position = pos
 
-        can_store = False
-        if system.sql.file_path != "":
-            can_store = True
-
-        items = []
         if mimedata.hasUrls():
             urls = mimedata.urls()
-            print("urls: ", urls)
-            for url in urls:
-                if url.isLocalFile():
-                    path = url.path()
-                    item = self.createItem(path, pos, can_store=can_store)
-                    items.append(item)
-                else:
-                    s_url = url.url()
-                    with urllib.request.urlopen(s_url) as response:
-                        with tempfile.NamedTemporaryFile() as temp_file:
-                            shutil.copyfileobj(response, temp_file)
-                            path = temp_file.name
-                            item = self.createItem(path, pos, url=s_url, can_store=can_store)
-                            items.append(item)
+            system.item_drop_worker.urls = urls
+            system.item_drop_worker.pos = pos
+            system.item_drop_thread.start()
+            # todo
+            self.parent().progress_bar.show()
         elif mimedata.hasImage():
             print("image: ")
 
-        if len(items) > 1:
-            self.scene().clearSelection()
-            for item in items:
-                item.setSelected(True)
-            self.packSelection()
 
-
-    def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0, url="", can_store=False) -> GraphicsItem:
+    def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0, url="", can_store=False, add_to_scene=True) -> GraphicsItem:
         file_type = None
         try:
             img = Image.open(path)
@@ -234,7 +187,8 @@ class GraphicsView(QGraphicsView):
         if is_flipped:
             item.flip()
 
-        self.scene().addItem(item)
+        if add_to_scene:
+            self.scene().addItem(item)
         center = item.boundingRect().center()
         item.setPos(item.pos() - center)
 
