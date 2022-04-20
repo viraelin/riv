@@ -169,8 +169,13 @@ class MainWindow(QMainWindow):
         if not len(items) > 0:
             return
 
+        can_delete = False
+        if system.sql.file_path != "":
+            can_delete = True
+
         for item in items:
-            system.sql.deleteItem(item)
+            if can_delete:
+                system.sql.deleteItem(item)
             self.scene.removeItem(item)
 
 
