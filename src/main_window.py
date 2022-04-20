@@ -70,6 +70,7 @@ class MainWindow(QMainWindow):
         system.sql.file_path = file_path
         system.sql.createDatabase()
         system.undo_stack.setClean()
+        system.settings.setValue("file_path", file_path)
         self.view.load()
 
 
@@ -113,11 +114,10 @@ class MainWindow(QMainWindow):
 
 
     def open(self):
-        start_dir = system.last_dialog_dir
         file_path, _selected_filter = QFileDialog().getOpenFileName(
             self,
             "Open Project",
-            start_dir,
+            system.last_dialog_dir,
             system.PROJECT_FILTER
         )
 
@@ -146,6 +146,7 @@ class MainWindow(QMainWindow):
         )
 
         if file_path:
+            system.last_dialog_dir, _ = os.path.split(file_path)
             project_ext = ".riv"
 
             # OS responsibility, but:
