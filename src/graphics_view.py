@@ -204,6 +204,22 @@ class GraphicsView(QGraphicsView):
         if url != "":
             basename = os.path.basename(url)
 
+        name, ext = os.path.splitext(basename)
+
+        ext_changed = False
+        if ext == "":
+            ext = "." + file_type.lower()
+            if ext == ".jpeg":
+                ext = ".jpg"
+            ext_changed = True
+
+        if name == ext:
+            with tempfile.NamedTemporaryFile() as temp_file:
+                basename = os.path.basename(temp_file.name)
+
+        if ext_changed:
+            basename += ext
+
         new_id = system.getItemID()
 
         item = GraphicsItem(new_id, QPixmap(path))
