@@ -3,6 +3,7 @@
 
 import os
 import math
+import time
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
@@ -227,3 +228,38 @@ class MainWindow(QMainWindow):
                 for item in items:
                     item.setSelected(True)
                 self.packSelection()
+
+
+    def exportImages(self) -> None:
+        items = self.scene.selectedItems()
+        assert(len(items) > 0)
+
+        directory = QFileDialog().getExistingDirectory(
+            self,
+            "Export Selection",
+            system.last_dialog_dir
+        )
+
+        if not directory:
+            return
+
+        for item in items:
+            files = os.listdir(directory)
+
+            new_name = item.path
+            name, ext = os.path.splitext(item.path)
+
+            index = 0
+            while new_name in files:
+                new_name = f"{name}-{index}{ext}"
+                index += 1
+
+            file_name = os.path.join(directory, new_name)
+
+            with open(file_name, "wb") as fp:
+                data = system.sql.getImage(item)
+                fp.write(data)
+
+            atime = time.time()
+            mtime = item.mtime
+            os.utime(file_name, (atime, mtime))

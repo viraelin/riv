@@ -99,6 +99,11 @@ class Actions:
         self.import_images.setText("Import Images")
         self.parent.addAction(self.import_images)
 
+        self.export_images = QAction(parent)
+        self.export_images.triggered.connect(self.onExportImages)
+        self.export_images.setText("Export Selection")
+        self.parent.addAction(self.export_images)
+
         self.menu.addAction(self.undo)
         self.menu.addAction(self.redo)
         self.menu.addSeparator()
@@ -114,6 +119,7 @@ class Actions:
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
         self.menu.addAction(self.import_images)
+        self.menu.addAction(self.export_images)
         self.menu.addSeparator()
         self.menu.addAction(self.quit)
 
@@ -125,6 +131,7 @@ class Actions:
         self.delete_selection.setEnabled(state)
         self.reset_transform.setEnabled(state)
         self.pack_selection.setEnabled(state)
+        self.export_images.setEnabled(state)
 
 
     def onSave(self) -> None:
@@ -177,3 +184,7 @@ class Actions:
 
     def onImportImages(self) -> None:
         self.parent.importImages()
+
+
+    def onExportImages(self) -> None:
+        self.parent.exportImages()

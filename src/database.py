@@ -139,3 +139,11 @@ class Database:
         cursor = connection.cursor()
         cursor.execute("DELETE FROM images WHERE id == ?", [item.id])
         connection.commit()
+
+
+    def getImage(self, item: GraphicsItem) -> bytes:
+        connection = sqlite3.connect(self.file_path)
+        cursor = connection.cursor()
+        cursor.execute("SELECT image FROM images WHERE id == ?", [item.id])
+        data = cursor.fetchall()[0][0]
+        return data
