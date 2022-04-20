@@ -211,5 +211,14 @@ class MainWindow(QMainWindow):
             pos = QPointF(system.actions.menu.pos())
             path, _ = os.path.split(file_paths[0])
             system.last_dialog_dir = path
+
+            items = []
             for file_path in file_paths:
-                self.view.createItem(file_path, pos, can_store=can_store)
+                item = self.view.createItem(file_path, pos, can_store=can_store)
+                items.append(item)
+
+            if len(items) > 1:
+                self.scene().clearSelection()
+                for item in items:
+                    item.setSelected(True)
+                self.packSelection()

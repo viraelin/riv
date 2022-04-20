@@ -154,22 +154,31 @@ class GraphicsView(QGraphicsView):
         if system.sql.file_path != "":
             can_store = True
 
+        items = []
         if mimedata.hasUrls():
             urls = mimedata.urls()
             print("urls: ", urls)
             for url in urls:
                 if url.isLocalFile():
                     path = url.path()
-                    self.createItem(path, pos, can_store=can_store)
+                    item = self.createItem(path, pos, can_store=can_store)
+                    items.append(item)
                 else:
                     s_url = url.url()
                     with urllib.request.urlopen(s_url) as response:
                         with tempfile.NamedTemporaryFile() as temp_file:
                             shutil.copyfileobj(response, temp_file)
                             path = temp_file.name
-                            self.createItem(path, pos, url=s_url, can_store=can_store)
+                            item = self.createItem(path, pos, url=s_url, can_store=can_store)
+                            items.append(item)
         elif mimedata.hasImage():
             print("image: ")
+
+        if len(items) > 1:
+            self.scene().clearSelection()
+            for item in items:
+                item.setSelected(True)
+            self.packSelection()
 
 
     def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0, url="", can_store=False) -> GraphicsItem:
