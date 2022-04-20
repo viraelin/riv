@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("[*]")
         # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
+        # self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
         self.setCentralWidget(self.view)
         self.show()
 
@@ -66,8 +66,10 @@ class MainWindow(QMainWindow):
 
     def loadFile(self, file_path: str):
         self.scene.clear()
+        self.view.resetTransform()
         system.sql.file_path = file_path
         system.sql.createDatabase()
+        system.undo_stack.setClean()
         self.view.load()
 
 
@@ -107,6 +109,8 @@ class MainWindow(QMainWindow):
         system.settings.setValue("grayscale", system.actions.grayscale.isChecked())
         system.settings.setValue("filtering", system.actions.filtering.isChecked())
 
+        system.undo_stack.setClean()
+
 
     def open(self):
         start_dir = system.last_dialog_dir
@@ -120,8 +124,34 @@ class MainWindow(QMainWindow):
         if file_path:
             system.last_dialog_dir, _ = os.path.split(file_path)
             self.loadFile(file_path)
-        else:
-            return
+
+
+    def new(self) -> None:
+        if self.isWindowModified():
+            result = self.notifyUnsavedChanges()
+            if result == QMessageBox.StandardButton.Save:
+                self.save()
+            elif result == QMessageBox.StandardButton.Discard:
+                pass
+            elif result == QMessageBox.StandardButton.Cancel:
+                return
+
+        file_path, _selected_filter = QFileDialog().getSaveFileName(
+            self,
+            "New Project",
+            system.last_dialog_dir,
+            system.PROJECT_FILTER
+        )
+
+        if file_path:
+            project_ext = ".riv"
+
+            name, ext = os.path.splitext(file_path)
+            if ext != project_ext:
+                ext = project_ext
+                file_path = name+ext
+
+            self.loadFile(file_path)
 
 
     def quit(self) -> None:
@@ -143,8 +173,8 @@ class MainWindow(QMainWindow):
     def notifyUnsavedChanges(self) -> QMessageBox.StandardButton:
         result = QMessageBox().warning(
             self,
-            "Quit",
-            "The document has unsaved changes.\nDo you want to save changes?",
+            "Unsaved Changes",
+            "The file has been modified.\nDo you want to save it?",
             QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Save
         )

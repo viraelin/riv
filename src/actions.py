@@ -103,6 +103,13 @@ class Actions:
         self.export_images.triggered.connect(self.onExportImages)
         self.export_images.setText("Export Selection")
         self.parent.addAction(self.export_images)
+        
+        self.new = QAction(parent)
+        self.new.triggered.connect(self.onNew)
+        self.new.setText("New Project")
+        self.new.setShortcut(QKeySequence.StandardKey.New)
+        self.new.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        self.parent.addAction(self.new)
 
         self.menu.addAction(self.undo)
         self.menu.addAction(self.redo)
@@ -116,6 +123,7 @@ class Actions:
         self.menu.addSeparator()
         self.menu.addAction(self.delete_selection)
         self.menu.addSeparator()
+        self.menu.addAction(self.new)
         self.menu.addAction(self.save)
         self.menu.addAction(self.open)
         self.menu.addAction(self.import_images)
@@ -188,3 +196,7 @@ class Actions:
 
     def onExportImages(self) -> None:
         self.parent.exportImages()
+
+
+    def onNew(self) -> None:
+        self.parent.new()
