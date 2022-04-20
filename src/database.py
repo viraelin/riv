@@ -34,6 +34,7 @@ class Database:
         images(
             id INTEGER PRIMARY KEY,
             path TEXT,
+            type TEXT,
             ctime REAL,
             mtime REAL,
             x INTEGER,
@@ -95,6 +96,7 @@ class Database:
             rotation = item.getRotation()
 
             cursor.execute("UPDATE images SET path = ? where id == ?", [path, item.id])
+            cursor.execute("UPDATE images SET type = ? where id == ?", [item.type, item.id])
             cursor.execute("UPDATE images SET ctime = ? where id == ?", [ctime, item.id])
             cursor.execute("UPDATE images SET mtime = ? where id == ?", [mtime, item.id])
 
@@ -128,8 +130,8 @@ class Database:
 
         connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [item.id, path, ctime, mtime, x, y, z, rotation, scale, flip, image])
+        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [item.id, path, item.type, ctime, mtime, x, y, z, rotation, scale, flip, image])
         connection.commit()
         buffer.close()
 
