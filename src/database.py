@@ -86,10 +86,6 @@ class Database:
         cursor = connection.cursor()
 
         for item in items:
-            path = item.path
-            ctime = item.ctime
-            mtime = item.mtime
-
             x = int(item.pos().x())
             y = int(item.pos().y())
             z = item.zValue()
@@ -97,10 +93,10 @@ class Database:
             flip = item.is_flipped
             rotation = item.getRotation()
 
-            cursor.execute("UPDATE images SET path = ? where id == ?", [path, item.id])
+            cursor.execute("UPDATE images SET path = ? where id == ?", [item.path, item.id])
             cursor.execute("UPDATE images SET type = ? where id == ?", [item.type, item.id])
-            cursor.execute("UPDATE images SET ctime = ? where id == ?", [ctime, item.id])
-            cursor.execute("UPDATE images SET mtime = ? where id == ?", [mtime, item.id])
+            cursor.execute("UPDATE images SET ctime = ? where id == ?", [item.ctime, item.id])
+            cursor.execute("UPDATE images SET mtime = ? where id == ?", [item.mtime, item.id])
 
             cursor.execute("UPDATE images SET x = ? WHERE id == ?", [x, item.id])
             cursor.execute("UPDATE images SET y = ? WHERE id == ?", [y, item.id])
@@ -119,10 +115,6 @@ class Database:
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         item.pixmap().save(buffer, item.type)
 
-        path = item.path
-        ctime = item.ctime
-        mtime = item.mtime
-
         x = int(item.pos().x())
         y = int(item.pos().y())
         z = item.zValue()
@@ -133,7 +125,7 @@ class Database:
         connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
         cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [item.id, path, item.type, ctime, mtime, x, y, z, rotation, scale, flip, image])
+            [item.id, item.path, item.type, item.ctime, item.mtime, x, y, z, rotation, scale, flip, image])
         connection.commit()
         buffer.close()
 

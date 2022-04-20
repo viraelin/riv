@@ -47,11 +47,6 @@ class GraphicsView(QGraphicsView):
         for entry in image_data:
             item_id = entry["id"]
 
-            item_path = entry["path"]
-            item_type = entry["type"]
-            item_ctime = entry["ctime"]
-            item_mtime = entry["mtime"]
-
             item_x = entry["x"]
             item_y = entry["y"]
             item_z_value = entry["z"]
@@ -65,10 +60,10 @@ class GraphicsView(QGraphicsView):
 
             item = GraphicsItem(item_id, pixmap)
 
-            item.path = item_path
-            item.type = item_type
-            item.ctime = item_ctime
-            item.mtime = item_mtime
+            item.path = entry["path"]
+            item.type = entry["type"]
+            item.ctime = entry["ctime"]
+            item.mtime = entry["mtime"]
 
             item.setPos(item_x, item_y)
             item.setZValue(item_z_value)
