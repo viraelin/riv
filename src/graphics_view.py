@@ -45,18 +45,20 @@ class GraphicsView(QGraphicsView):
         image_data = system.sql.loadImages()
         for entry in image_data:
             item_id = entry[0]
-            item_x = entry[1]
-            item_y = entry[2]
-            item_z_value = entry[3]
-            item_rotation = entry[4]
-            item_scale = entry[5]
-            item_is_flipped = entry[6]
-            item_image = entry[7]
+            item_path = entry[1]
+            item_x = entry[2]
+            item_y = entry[3]
+            item_z_value = entry[4]
+            item_rotation = entry[5]
+            item_scale = entry[6]
+            item_is_flipped = entry[7]
+            item_image = entry[8]
 
             pixmap = QPixmap()
             pixmap.loadFromData(item_image)
 
             item = GraphicsItem(item_id, pixmap)
+            item.path = item_path
             item.setPos(item_x, item_y)
             item.setZValue(item_z_value)
             item.setScale(item_scale)

@@ -33,6 +33,7 @@ class Database:
         cursor.execute("""CREATE TABLE IF NOT EXISTS
         images(
             id INTEGER PRIMARY KEY,
+            path STRING,
             x INTEGER,
             y INTEGER,
             z INTEGER,
@@ -80,6 +81,7 @@ class Database:
         cursor = connection.cursor()
 
         for item in items:
+            path = item.path
             x = int(item.pos().x())
             y = int(item.pos().y())
             z = item.zValue()
@@ -87,6 +89,7 @@ class Database:
             flip = item.is_flipped
             rotation = item.getRotation()
 
+            cursor.execute("UPDATE images SET path = ? where id == ?", [path, item.id])
             cursor.execute("UPDATE images SET x = ? WHERE id == ?", [x, item.id])
             cursor.execute("UPDATE images SET y = ? WHERE id == ?", [y, item.id])
             cursor.execute("UPDATE images SET z = ? WHERE id == ?", [z, item.id])
@@ -104,6 +107,7 @@ class Database:
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         item.pixmap().save(buffer, item.type)
 
+        path = item.path
         x = int(item.pos().x())
         y = int(item.pos().y())
         z = item.zValue()
@@ -113,8 +117,8 @@ class Database:
 
         connection = sqlite3.connect(self.file_path)
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [item.id, x, y, z, rotation, scale, flip, image])
+        cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [item.id, path, x, y, z, rotation, scale, flip, image])
         connection.commit()
         buffer.close()
 
