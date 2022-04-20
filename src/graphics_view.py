@@ -45,20 +45,20 @@ class GraphicsView(QGraphicsView):
     def load(self):
         image_data = system.sql.loadImages()
         for entry in image_data:
-            item_id = entry[0]
+            item_id = entry["id"]
 
-            item_path = entry[1]
-            item_type = entry[2]
-            item_ctime = entry[3]
-            item_mtime = entry[4]
+            item_path = entry["path"]
+            item_type = entry["type"]
+            item_ctime = entry["ctime"]
+            item_mtime = entry["mtime"]
 
-            item_x = entry[5]
-            item_y = entry[6]
-            item_z_value = entry[7]
-            item_rotation = entry[8]
-            item_scale = entry[9]
-            item_is_flipped = entry[10]
-            item_image = entry[11]
+            item_x = entry["x"]
+            item_y = entry["y"]
+            item_z_value = entry["z"]
+            item_rotation = entry["rotation"]
+            item_scale = entry["scale"]
+            item_is_flipped = entry["flip"]
+            item_image = entry["image"]
 
             pixmap = QPixmap()
             pixmap.loadFromData(item_image)
@@ -81,9 +81,9 @@ class GraphicsView(QGraphicsView):
             system.item_ids.append(item_id)
 
         view_data = system.sql.loadView()
-        view_x = view_data[1]
-        view_y = view_data[2]
-        view_scale = view_data[3]
+        view_x = view_data["x"]
+        view_y = view_data["y"]
+        view_scale = view_data["scale"]
         view_pos = QPointF(view_x, view_y)
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)

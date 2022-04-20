@@ -48,16 +48,18 @@ class Database:
         connection.commit()
 
 
-    def loadView(self) -> list:
+    def loadView(self) -> dict:
         connection = sqlite3.connect(self.file_path)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM view WHERE id == 0")
         data = cursor.fetchall()[0]
         return data
 
 
-    def loadImages(self) -> list:
+    def loadImages(self) -> list[dict]:
         connection = sqlite3.connect(self.file_path)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM images")
         data = cursor.fetchall()
