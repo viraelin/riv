@@ -93,7 +93,8 @@ class MainWindow(QMainWindow):
         self.view.resetTransform()
         system.sql.file_path = file_path
         system.sql.createDatabase()
-        system.undo_stack.setClean()
+        system.undo_stack.clear()
+        system.undo_stack.resetClean()
         system.settings.setValue("file_path", file_path)
         self.view.load()
 
