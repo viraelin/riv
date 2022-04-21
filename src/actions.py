@@ -75,6 +75,8 @@ class Actions:
         self.filtering.setCheckable(True)
         self.filtering.toggled.connect(self.onFiltering)
         self.filtering.setText("Filtering")
+        self.filtering.setShortcut(QKeySequence(Qt.Key.Key_A))
+        self.filtering.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         self.parent.addAction(self.filtering)
 
         self.pack_selection = QAction(parent)
