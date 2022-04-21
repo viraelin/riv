@@ -120,10 +120,12 @@ class Database:
 
 
     def storeItem(self, item: GraphicsItem) -> None:
-        image = QByteArray()
-        buffer = QBuffer(image)
-        buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-        item.pixmap().save(buffer, item.type)
+        # todo
+        image: bytes = None
+        with open(item.source_path, "rb") as fp:
+            image = fp.read()
+
+        assert(image)
 
         x = int(item.pos().x())
         y = int(item.pos().y())
@@ -137,7 +139,6 @@ class Database:
         cursor.execute("INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [item.id, item.path, item.type, item.ctime, item.mtime, x, y, z, rotation, scale, flip, image])
         connection.commit()
-        buffer.close()
 
 
     def deleteItem(self, item: GraphicsItem) -> None:

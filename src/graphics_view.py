@@ -175,6 +175,7 @@ class GraphicsView(QGraphicsView):
         item = GraphicsItem(new_id, QPixmap(path))
 
         item.path = basename
+        item.source_path = path
         item.mtime = os.path.getmtime(path)
         item.ctime = time.time()
 

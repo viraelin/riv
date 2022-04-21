@@ -14,6 +14,7 @@ class GraphicsItem(QGraphicsPixmapItem):
         super().__init__(pixmap, parent=parent)
         self.id = id_
         self.path = None
+        self.source_path = None
         self.ctime = None
         self.mtime = None
         self.type = None
