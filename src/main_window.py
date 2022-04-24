@@ -293,6 +293,7 @@ class MainWindow(QMainWindow):
 
 
     def importImages(self) -> None:
+        # todo: thread
         image_filter = "Images (*.png *.jpg *.jpeg)"
         file_paths, _selected_filter = QFileDialog().getOpenFileNames(
             self,
@@ -306,15 +307,16 @@ class MainWindow(QMainWindow):
             path, _ = os.path.split(file_paths[0])
             system.last_dialog_dir = path
 
-            items = []
+            self.scene.clearSelection()
+            item_count = 0
             for file_path in file_paths:
                 item = self.view.addItem(path=file_path, pos=pos)
-                items.append(item)
-
-            if len(items) > 1:
-                self.scene().clearSelection()
-                for item in items:
+                if item:
                     item.setSelected(True)
+                    self.scene.addItem(item)
+                    item_count += 1
+
+            if item_count > 1:
                 self.packSelection()
 
 
