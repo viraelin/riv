@@ -266,13 +266,8 @@ class MainWindow(QMainWindow):
         if not len(items) > 0:
             return
 
-        can_delete = False
-        if system.sql.file_path != "":
-            can_delete = True
-
         for item in items:
-            if can_delete:
-                system.sql.deleteItem(item)
+            system.sql.deleteItem(item)
             self.scene.removeItem(item)
 
 
@@ -307,16 +302,13 @@ class MainWindow(QMainWindow):
         )
 
         if len(file_paths) > 0:
-            can_store = False
-            if system.sql.file_path != "":
-                can_store = True
             pos = QPointF(system.actions.menu.pos())
             path, _ = os.path.split(file_paths[0])
             system.last_dialog_dir = path
 
             items = []
             for file_path in file_paths:
-                item = self.view.createItem(file_path, pos, can_store=can_store)
+                item = self.view.addItem(path=file_path, pos=pos)
                 items.append(item)
 
             if len(items) > 1:

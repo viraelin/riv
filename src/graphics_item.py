@@ -1,25 +1,88 @@
 # Copyright (C) 2020-2022 viraelin
 # License: GPLv3.0
 
+import os
 import math
+import time
+
+from PIL import (Image, UnidentifiedImageError)
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
+import system
+
 
 class GraphicsItem(QGraphicsPixmapItem):
 
-    def __init__(self, id_: int, pixmap: QPixmap, parent=None) -> None:
-        super().__init__(pixmap, parent=parent)
-        self.id = id_
-        self.path = None
-        self.source_path = None
-        self.ctime = None
-        self.mtime = None
-        self.type = None
+    def __init__(self, **kwargs: dict) -> None:
+        super().__init__()
+
+        item_id = kwargs.get("id")
+        path = kwargs.get("path")
+        url = kwargs.get("url", "")
+        pos = kwargs.get("pos", QPointF())
+        scale = kwargs.get("scale", 1.0)
+        z_value = kwargs.get("z", 0)
+        is_flipped = kwargs.get("flip", False)
+        is_drop = kwargs.get("drop", True)
+        file_type = kwargs.get("type")
+        rotation = kwargs.get("rotation", 0.0)
+        ctime = kwargs.get("ctime")
+        mtime = kwargs.get("mtime")
+
+        basename = os.path.basename(path)
+        if url != "":
+            basename = os.path.basename(url)
+        name, ext = os.path.splitext(basename)
+        ext_changed = False
+        if ext == "":
+            ext = "." + file_type.lower()
+            if ext == ".jpeg":
+                ext = ".jpg"
+            ext_changed = True
+        if name == ext:
+            with tempfile.NamedTemporaryFile() as temp_file:
+                basename = os.path.basename(temp_file.name)
+        if ext_changed:
+            basename += ext
+
+        if item_id:
+            system.item_ids.append(item_id)
+        else:
+            item_id = system.getItemID()
+
+        if is_drop:
+            pixmap = QPixmap(path)
+            ctime = time.time()
+            mtime = os.path.getmtime(path)
+        else:
+            image = kwargs.get("image")
+            pixmap = QPixmap()
+            pixmap.loadFromData(image)
+
+        self.id = item_id
+        self.path = basename
+        self.source_path = path
+        self.ctime = ctime
+        self.mtime = mtime
+        self.type = file_type
+
+        self.setPixmap(pixmap)
+        self.setPos(pos)
+        self.setScale(scale)
+        self.setRotation(math.degrees(rotation))
+        self.setZValue(z_value)
+
         self.is_flipped = False
-        self.is_deleted = False
+        if is_flipped:
+            self.flip()
+
+        if is_drop:
+            center = self.boundingRect().center()
+            self.setPos(self.pos() - center)
+
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)

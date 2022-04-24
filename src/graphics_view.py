@@ -6,7 +6,6 @@ import math
 import tempfile
 import rpack
 import shutil
-import urllib.request
 import time
 
 from PIL import (Image, UnidentifiedImageError)
@@ -142,7 +141,7 @@ class GraphicsView(QGraphicsView):
             print("image: ")
 
 
-    def createItem(self, path: str, pos: QPointF, is_flipped=False, scale=1.0, z_value=0, url="", can_store=False, add_to_scene=True) -> GraphicsItem:
+    def addItem(self, path: str, pos: QPointF, url="", **kwargs: dict) -> GraphicsItem:
         file_type = None
         try:
             img = Image.open(path)
@@ -150,52 +149,9 @@ class GraphicsView(QGraphicsView):
         except UnidentifiedImageError:
             return None
 
-        basename = os.path.basename(path)
-        if url != "":
-            basename = os.path.basename(url)
-
-        name, ext = os.path.splitext(basename)
-
-        ext_changed = False
-        if ext == "":
-            ext = "." + file_type.lower()
-            if ext == ".jpeg":
-                ext = ".jpg"
-            ext_changed = True
-
-        if name == ext:
-            with tempfile.NamedTemporaryFile() as temp_file:
-                basename = os.path.basename(temp_file.name)
-
-        if ext_changed:
-            basename += ext
-
-        new_id = system.getItemID()
-
-        item = GraphicsItem(new_id, QPixmap(path))
-
-        item.path = basename
-        item.source_path = path
-        item.mtime = os.path.getmtime(path)
-        item.ctime = time.time()
-
-        item.type = file_type
-        item.setPos(pos)
-        item.setScale(scale)
-        item.setZValue(z_value)
+        item = GraphicsItem(path=path, pos=pos, type=file_type, url=url, **kwargs)
         item.setTransformationMode(self.transformation_mode)
-
-        if is_flipped:
-            item.flip()
-
-        if add_to_scene:
-            self.scene().addItem(item)
-        center = item.boundingRect().center()
-        item.setPos(item.pos() - center)
-
-        if can_store:
-            system.sql.storeItem(item)
-
+        system.sql.storeItem(item)
         return item
 
 
