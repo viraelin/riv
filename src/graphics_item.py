@@ -4,8 +4,7 @@
 import os
 import math
 import time
-
-from PIL import (Image, UnidentifiedImageError)
+import tempfile
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
